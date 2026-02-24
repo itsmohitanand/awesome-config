@@ -1,0 +1,65 @@
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  python-dev.kdl  —  Zellij layout for Python venv workflows     ║
+// ║                                                                  ║
+// ║  Launch: pydev [session-name] [/path/to/project]                ║
+// ║                                                                  ║
+// ║  Tab 1 ─  Editor   │ nvim (65%) + shell + python REPL           ║
+// ║  Tab 2 ─  Tests    │ pytest runner + log tail                   ║
+// ║  Tab 3 ─  Git      │ full-width shell for git / lazygit         ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+layout {
+
+    // ── Tab 1: Editor ──────────────────────────────────────────────
+    tab name=" Editor" focus=true {
+        pane split_direction="vertical" {
+
+            // Main editor pane — 65 % width
+            pane size="65%" name=" nvim" {
+                command "nvim"
+            }
+
+            // Right column — shell on top, REPL on bottom
+            pane split_direction="horizontal" {
+
+                // Activated venv shell
+                pane name=" shell" {
+                    command "bash"
+                    args "-c" "for d in .venv venv env; do [ -f \"$d/bin/activate\" ] && source \"$d/bin/activate\" && break; done; exec $SHELL"
+                }
+
+                // Python REPL with venv already active
+                pane name=" python" {
+                    command "bash"
+                    args "-c" "for d in .venv venv env; do [ -f \"$d/bin/activate\" ] && source \"$d/bin/activate\" && break; done; python3"
+                }
+            }
+        }
+    }
+
+    // ── Tab 2: Tests ───────────────────────────────────────────────
+    tab name=" Tests" {
+        pane split_direction="horizontal" {
+
+            // Pytest runner — run your tests here
+            pane name=" pytest" {
+                command "bash"
+                args "-c" "for d in .venv venv env; do [ -f \"$d/bin/activate\" ] && source \"$d/bin/activate\" && break; done; exec $SHELL"
+            }
+
+            // Log / output watcher
+            pane name=" logs" {
+                command "bash"
+                args "-c" "for d in .venv venv env; do [ -f \"$d/bin/activate\" ] && source \"$d/bin/activate\" && break; done; exec $SHELL"
+            }
+        }
+    }
+
+    // ── Tab 3: Git ─────────────────────────────────────────────────
+    tab name=" Git" {
+        pane name=" git" {
+            command "bash"
+            args "-c" "for d in .venv venv env; do [ -f \"$d/bin/activate\" ] && source \"$d/bin/activate\" && break; done; exec $SHELL"
+        }
+    }
+}

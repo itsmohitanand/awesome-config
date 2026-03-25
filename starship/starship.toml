@@ -28,7 +28,7 @@ $cmd_duration\
 $line_break\
 $character"""
 
-palette = 'everblush'
+palette = 'cyberdream'
 
 [os]
 disabled = false
@@ -166,19 +166,33 @@ disabled = false
 show_notifications = true
 min_time_to_notify = 45000
 
-[palettes.everblush]
-red = "#e57474"
-peach = "#e5a574"
-yellow = "#e5c76b"
-green = "#8ccf7e"
-sapphire = "#67b0e8"
-lavender = "#c47fd5"
-teal = "#6cbfbf"
-text = "#dadada"
-subtext1 = "#b3b9b8"
-surface0 = "#232a2d"
-base = "#141b1e"
-crust = "#141b1e"
+[palettes.cyberdream]
+red = "#ff6e5e"
+peach = "#ffbd5e"
+yellow = "#f1ff5e"
+green = "#5eff6c"
+sapphire = "#5ea1ff"
+lavender = "#bd5eff"
+teal = "#5ef1ff"
+text = "#ffffff"
+subtext1 = "#ffffff"
+surface0 = "#3c4048"
+base = "#16181a"
+crust = "#16181a"
+
+# [palettes.everblush]
+# red = "#e57474"
+# peach = "#e5a574"
+# yellow = "#e5c76b"
+# green = "#8ccf7e"
+# sapphire = "#67b0e8"
+# lavender = "#c47fd5"
+# teal = "#6cbfbf"
+# text = "#dadada"
+# subtext1 = "#b3b9b8"
+# surface0 = "#232a2d"
+# base = "#141b1e"
+# crust = "#141b1e"
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"

@@ -282,7 +282,8 @@ simplified_ui false
 // Choose the theme that is specified in the themes section.
 // Default: default
 //
-theme "everblush"
+// To switch themes: switch-theme <name>  (cyberdream | everblush)
+theme "cyberdream"
  
 // Choose the base input mode of zellij.
 // Default: normal
@@ -532,9 +533,22 @@ theme "everblush"
 // post_command_discovery_hook "echo $RESURRECT_COMMAND | sed <your_regex_here>"
 
 // ============================================================================
-// Everblush Theme — https://github.com/Everblush/everblush
+// Themes
 // ============================================================================
 themes {
+    cyberdream {
+        fg      "#ffffff"
+        bg      "#16181a"
+        black   "#16181a"
+        red     "#ff6e5e"
+        green   "#5eff6c"
+        yellow  "#f1ff5e"
+        blue    "#5ea1ff"
+        magenta "#bd5eff"
+        cyan    "#5ef1ff"
+        white   "#ffffff"
+        orange  "#ffbd5e"
+    }
     everblush {
         fg      "#dadada"
         bg      "#141b1e"

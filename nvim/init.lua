@@ -77,21 +77,6 @@ require('lazy').setup(
   -- Quality of Life
   { 'tpope/vim-commentary' },
 
-  -- Syntax Highlighting
-  {
-    'nvim-treesitter/nvim-treesitter',
-    build = ':TSUpdate',
-    config = function()
-      require('nvim-treesitter.configs').setup({
-        ensure_installed = { 'c', 'cpp', 'lua', 'vim', 'vimdoc', 'bash', 'markdown', 'norg' },
-        sync_install = false,
-        auto_install = true,
-        highlight = { enable = true },
-        indent = { enable = true },
-      })
-    end,
-  },
-
   -- Import all modular plugin configs from lua/plugins/ directory
   { import = 'plugins' },
 }, {

@@ -14,9 +14,24 @@ return {
     notifier  = { enabled = true, timeout = 3000 },
     indent    = { enabled = true },
     bigfile   = { enabled = true },
-    terminal  = { enabled = true },
+    terminal  = {
+      enabled = true,
+      win = {
+        position = 'bottom',
+        height   = 0.3,
+      },
+    },
     image     = { enabled = true },
   },
+  init = function()
+    vim.api.nvim_create_autocmd('VimEnter', {
+      callback = function()
+        if vim.fn.argc() == 0 then
+          Snacks.terminal(nil, { reuse = true })
+        end
+      end,
+    })
+  end,
   keys = {
     { '<leader>ff', function() Snacks.picker.files({ hidden = true }) end, desc = 'Find files' },
     { '<leader>fg', function() Snacks.picker.grep() end,                   desc = 'Live grep' },

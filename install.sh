@@ -2,7 +2,7 @@
 set -e
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 
-mkdir -p ~/.config/kitty/themes ~/.config/zellij/layouts
+mkdir -p ~/.config/kitty/themes ~/.config/zellij/layouts ~/.config/nvim
 
 # Kitty
 ln -sf "$DOTFILES/kitty/kitty.conf"                   ~/.config/kitty/kitty.conf
@@ -15,6 +15,10 @@ ln -sf "$DOTFILES/zellij/layouts/python-dev.kdl"      ~/.config/zellij/layouts/p
 
 # Starship
 ln -sf "$DOTFILES/starship/starship.toml"             ~/.config/starship.toml
+
+# Neovim
+ln -sf "$DOTFILES/nvim/init.lua"                      ~/.config/nvim/init.lua
+ln -sf "$DOTFILES/nvim/lua"                           ~/.config/nvim/lua
 
 # Shell config (source this from ~/.zshrc or ~/.bashrc)
 ln -sf "$DOTFILES/.modern_shell_config"               ~/.modern_shell_config

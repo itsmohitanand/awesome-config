@@ -63,6 +63,13 @@ awesome-config/
 │   └── themes/
 │       ├── cyberdream.conf
 │       └── everblush.conf
+├── nvim/
+│   ├── init.lua            # Entry point; local theme = 'X' to select
+│   └── lua/
+│       ├── core/
+│       │   └── options.lua
+│       ├── keymaps.lua
+│       └── plugins/        # Modular plugin configs (LSP, DAP, REPL, etc.)
 ├── starship/
 │   └── starship.toml       # All palettes defined; palette = 'X' to select
 └── zellij/

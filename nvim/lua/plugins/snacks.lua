@@ -21,16 +21,14 @@ return {
         height   = 0.3,
       },
     },
-    image     = { enabled = true },
+    image     = { enabled = false }, -- zellij does not support kitty graphics protocol
+    input     = { enabled = true },  -- required for vim.ui.select override
   },
-  init = function()
-    vim.api.nvim_create_autocmd('VimEnter', {
-      callback = function()
-        if vim.fn.argc() == 0 then
-          Snacks.terminal(nil, { reuse = true })
-        end
-      end,
-    })
+  config = function(_, opts)
+    require('snacks').setup(opts)
+    -- Wire vim.ui overrides after snacks is fully initialised
+    vim.ui.select = Snacks.picker.select
+    vim.ui.input  = Snacks.input
   end,
   keys = {
     { '<leader>ff', function() Snacks.picker.files({ hidden = true }) end, desc = 'Find files' },

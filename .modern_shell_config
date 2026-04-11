@@ -50,6 +50,7 @@ if command -v bat &>/dev/null; then
 fi
 
 # zoxide replaces cd (z <fuzzy-dir> to jump)
+export PATH="$HOME/.local/bin:$PATH"
 if command -v zoxide &>/dev/null; then
     if [ -n "$ZSH_VERSION" ]; then
         eval "$(zoxide init zsh)"
@@ -127,6 +128,11 @@ alias vi='nvim'
 alias vim='nvim'
 alias zm='zellij'
 alias tm='tmux'
+
+# ============================================================================
+# ALIASES — Kitty
+# ============================================================================
+alias icat='kitty +kitten icat'
 
 # ============================================================================
 # FUNCTIONS

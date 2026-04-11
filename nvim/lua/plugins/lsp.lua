@@ -31,7 +31,7 @@ return {
 
       -- Install LSP servers via Mason
       require('mason-lspconfig').setup({
-        ensure_installed = { 'clangd', 'lua_ls', 'basedpyright', 'stylua' },
+        ensure_installed = { 'clangd', 'lua_ls', 'stylua', 'texlab' },
       })
 
       -- Modern nvim 0.11+ LSP configuration using vim.lsp.config
@@ -61,24 +61,7 @@ return {
         capabilities = capabilities,
       })
 
-      -- Python type checking (basedpyright)
-      vim.lsp.config('basedpyright', {
-        cmd = { vim.fn.stdpath('data') .. '/mason/bin/basedpyright-langserver', '--stdio' },
-        filetypes = { 'python' },
-        root_markers = { 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', 'pyrightconfig.json', '.git' },
-        capabilities = capabilities,
-        settings = {
-          basedpyright = {
-            analysis = {
-              typeCheckingMode = "basic", -- "off" | "basic" | "standard" | "strict"
-              autoSearchPaths = true,
-              useLibraryCodeForTypes = true,
-            },
-          },
-        },
-      })
-
-      -- Python linting (ruff from virtualenv)
+      -- Python linting/formatting (ruff)
       if vim.fn.executable('ruff') == 1 then
         vim.lsp.config('ruff', {
           cmd = { 'ruff', 'server' },
@@ -89,8 +72,42 @@ return {
         vim.lsp.enable('ruff')
       end
 
+      -- Python type checking (ty)
+      if vim.fn.executable('ty') == 1 then
+        vim.lsp.config('ty', {
+          cmd = { 'ty', 'server' },
+          filetypes = { 'python' },
+          root_markers = { 'pyproject.toml', 'ty.toml', '.git' },
+          capabilities = capabilities,
+        })
+        vim.lsp.enable('ty')
+      end
+
+      -- LaTeX LSP (texlab)
+      vim.lsp.config('texlab', {
+        cmd = { vim.fn.stdpath('data') .. '/mason/bin/texlab' },
+        filetypes = { 'tex', 'plaintex', 'bib' },
+        root_markers = { '.latexmkrc', '.git', 'Makefile' },
+        capabilities = capabilities,
+        settings = {
+          texlab = {
+            auxDirectory = '.aux',
+            bibtexFormatter = 'texlab',
+            latexFormatter = 'latexindent',
+            latexindent = { modifyLineBreaks = false },
+            build = {
+              executable = 'latexmk',
+              args = { '-pdf', '-interaction=nonstopmode', '-synctex=1', '%f' },
+              onSave = false,
+            },
+            chktex = { onOpenAndSave = true },
+            forwardSearch = { executable = 'zathura', args = { '--synctex-forward', '%l:1:%f', '%p' } },
+          },
+        },
+      })
+
       -- Enable LSP servers
-      vim.lsp.enable({ 'lua_ls', 'clangd', 'basedpyright' })
+      vim.lsp.enable({ 'lua_ls', 'clangd', 'texlab' })
 
       -- LSP keybindings (using LspAttach autocmd - the modern way)
       vim.api.nvim_create_autocmd('LspAttach', {
@@ -104,7 +121,29 @@ return {
             vim.keymap.set(mode, lhs, rhs, options)
           end
 
-          bufmap('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to Definition' })
+          bufmap('n', 'gd', function()
+            vim.lsp.buf.definition({
+              on_list = function(opts)
+                local seen = {}
+                local unique = {}
+                for _, item in ipairs(opts.items) do
+                  local key = item.filename .. ':' .. item.lnum .. ':' .. item.col
+                  if not seen[key] then
+                    seen[key] = true
+                    table.insert(unique, item)
+                  end
+                end
+                if #unique == 1 then
+                  vim.cmd('edit ' .. unique[1].filename)
+                  vim.api.nvim_win_set_cursor(0, { unique[1].lnum, unique[1].col - 1 })
+                else
+                  opts.items = unique
+                  vim.fn.setqflist({}, ' ', opts)
+                  vim.cmd('copen')
+                end
+              end,
+            })
+          end, { desc = 'Go to Definition' })
           bufmap('n', 'K', vim.lsp.buf.hover, { desc = 'Show Hover Docs' })
           bufmap('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename Symbol' })
           bufmap('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'Code Action' })

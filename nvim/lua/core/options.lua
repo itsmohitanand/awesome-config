@@ -27,6 +27,12 @@ vim.opt.grepformat = '%f:%l:%c:%m'
 -- Font setting for GUI clients
 vim.o.guifont = "FiraCode Nerd Font:h11"
 
+-- Disable unused providers (speeds up startup, removes checkhealth noise)
+vim.g.loaded_perl_provider   = 0
+vim.g.loaded_ruby_provider   = 0
+vim.g.loaded_node_provider   = 0
+vim.g.loaded_python3_provider = 0
+
 
 -- -----------------------------------------------------------------------------
 -- CLIPBOARD CONFIGURATION (Local & Remote/OSC 52)

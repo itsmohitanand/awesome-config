@@ -1,0 +1,65 @@
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  phd.kdl  —  Zellij layout for LaTeX thesis writing             ║
+// ║                                                                  ║
+// ║  Launch: phd                                                     ║
+// ║                                                                  ║
+// ║  Tab 1 ─ Write  │ nvim (62%) + shell / Zathura launcher (38%)   ║
+// ║  Tab 2 ─ Build  │ latexmk log (top) + shell (bottom)            ║
+// ║  Tab 3 ─ Git    │ full-width shell                              ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+layout {
+
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    // ── Tab 1: Write ───────────────────────────────────────────────
+    tab name=" Write" focus=true {
+        pane split_direction="vertical" {
+
+            // Main editor — 62% width, open thesis root
+            pane size="62%" name=" nvim" {
+                command "nvim"
+            }
+
+            // Right column — launch Zathura then drop to shell
+            pane name=" preview" {
+                command "bash"
+                args "-c" "PDF=$(find . -maxdepth 3 -name '*.pdf' 2>/dev/null | head -1); [ -n \"$PDF\" ] && zathura \"$PDF\" & exec $SHELL"
+            }
+        }
+    }
+
+    // ── Tab 2: Build ───────────────────────────────────────────────
+    tab name=" Build" {
+        pane split_direction="horizontal" {
+
+            // Run latexmk here: latexmk -pvc -pdf Thesis.tex
+            pane size="70%" name=" latexmk" {
+                command "bash"
+                args "-c" "exec $SHELL"
+            }
+
+            // Watch errors / aux output
+            pane name=" log" {
+                command "bash"
+                args "-c" "exec $SHELL"
+            }
+        }
+    }
+
+    // ── Tab 3: Git ─────────────────────────────────────────────────
+    tab name=" Git" {
+        pane name=" git" {
+            command "bash"
+            args "-c" "exec $SHELL"
+        }
+    }
+}

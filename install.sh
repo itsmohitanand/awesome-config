@@ -12,6 +12,7 @@ ln -sf "$DOTFILES/kitty/themes/everblush.conf"        ~/.config/kitty/themes/eve
 # Zellij
 ln -sf "$DOTFILES/zellij/config.kdl"                  ~/.config/zellij/config.kdl
 ln -sf "$DOTFILES/zellij/layouts/python-dev.kdl"      ~/.config/zellij/layouts/python-dev.kdl
+ln -sf "$DOTFILES/zellij/layouts/phd.kdl"             ~/.config/zellij/layouts/phd.kdl
 
 # Starship
 ln -sf "$DOTFILES/starship/starship.toml"             ~/.config/starship.toml

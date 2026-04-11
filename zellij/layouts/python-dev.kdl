@@ -10,6 +10,10 @@
 
 layout {
 
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+
     // ── Tab 1: Editor ──────────────────────────────────────────────
     tab name=" Editor" focus=true {
         pane split_direction="vertical" {

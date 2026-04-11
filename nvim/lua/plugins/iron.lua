@@ -61,8 +61,8 @@ return {
     iron_action({'n', 'v'}, '<leader>rc', function() iron.send_motion() end, 'Send motion/visual to REPL')
     iron_action('n', '<leader>rp', function() iron.send_paragraph() end, 'Send paragraph to REPL')
     iron_action('n', '<leader>ru', function() iron.send_until_cursor() end, 'Send until cursor to REPL')
-    iron_action('n', '<leader>rb', function() iron.send_code_block() end, 'Send code block to REPL')
-    iron_action('n', '<leader>rj', function() iron.send_code_block_and_move() end, 'Send code block and move')
+    iron_action('n', '<leader>rb', function() iron.send_code_block(false) end, 'Send code block to REPL')
+    iron_action('n', '<leader>rj', function() iron.send_code_block(true) end, 'Send code block and move')
     vim.keymap.set('n', '<leader>rF', '<cmd>IronFocus<cr>', { desc = 'Focus REPL' })
     vim.keymap.set('n', '<leader>rh', '<cmd>IronHide<cr>', { desc = 'Hide REPL' })
   end,

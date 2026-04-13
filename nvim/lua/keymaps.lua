@@ -77,6 +77,31 @@ map('v', '<leader>y', '"+y', { desc = 'Yank selection to clipboard' })
 map('v', '<leader>p', '"+p', { desc = 'Paste from system clipboard' })
 
 
+-- Disable diff commands that conflict with DAP <leader>d* keymaps
+map('n', 'do', '<Nop>', { desc = 'Disabled: use :diffget explicitly' })
+map('n', 'dp', '<Nop>', { desc = 'Disabled: use :diffput explicitly' })
+
+---------------------
+-- COMMENTING (vim-commentary)
+---------------------
+-- Ctrl+/ toggles comment (terminals often send <C-_> for Ctrl+/)
+vim.keymap.set('n', '<C-/>', 'gcc', { remap = true, silent = true, desc = 'Toggle comment line' })
+vim.keymap.set('v', '<C-/>', 'gc', { remap = true, silent = true, desc = 'Toggle comment selection' })
+vim.keymap.set('n', '<C-_>', 'gcc', { remap = true, silent = true, desc = 'Toggle comment line' })
+vim.keymap.set('v', '<C-_>', 'gc', { remap = true, silent = true, desc = 'Toggle comment selection' })
+
+---------------------
+-- DIAGNOSTICS
+---------------------
+map('n', ']d', vim.diagnostic.goto_next, { desc = 'Next Diagnostic' })
+map('n', '[d', vim.diagnostic.goto_prev, { desc = 'Prev Diagnostic' })
+map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Floating Diagnostic' })
+map('n', '<leader>cx', function()
+  local enabled = vim.diagnostic.is_enabled()
+  vim.diagnostic.enable(not enabled)
+  vim.notify(enabled and 'Diagnostics off' or 'Diagnostics on')
+end, { desc = 'Toggle Diagnostics' })
+
 ---------------------
 -- LSP MAPPINGS (Normal Mode)
 ---------------------

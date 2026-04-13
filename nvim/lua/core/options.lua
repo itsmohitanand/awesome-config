@@ -7,6 +7,7 @@ vim.opt.termguicolors = true  -- Enable 24-bit RGB colors
 vim.opt.undofile = true       -- Persist undo history
 vim.opt.mouse = 'a'           -- Enable mouse support
 vim.opt.scrolloff = 8         -- Keep 8 lines of context around the cursor
+vim.opt.timeoutlen = 300      -- Faster key sequence timeout (affects which-key popup speed)
 
 -- Indentation
 vim.opt.tabstop = 4       -- Number of spaces a <Tab> counts for

@@ -5,11 +5,19 @@ return {
   opts = {
     picker = {
       ui_select = true,
-      sources = {
-        files = { hidden = true },
+    },
+    explorer  = {
+      enabled = true,
+      keys = {
+        ["<leader>y"] = function(picker, item)
+          if item then
+            local path = item.file or item.path
+            vim.fn.setreg("+", path)
+            Snacks.notify("Copied: " .. path)
+          end
+        end,
       },
     },
-    explorer  = { enabled = true },
     lazygit   = { enabled = true },
     notifier  = { enabled = true, timeout = 3000 },
     indent    = { enabled = true },
@@ -35,6 +43,7 @@ return {
     { '<leader>fg', function() Snacks.picker.grep() end,                   desc = 'Live grep' },
     { '<leader>fb', function() Snacks.picker.buffers() end,                desc = 'Find buffers' },
     { '<leader>e',  function() Snacks.explorer() end,                      desc = 'Toggle explorer' },
+    { '<leader>xd', function() Snacks.picker.diagnostics() end,            desc = 'Diagnostics' },
     { '<leader>gg', function() Snacks.lazygit() end,                       desc = 'LazyGit' },
     { '<C-`>',      function() Snacks.terminal() end, mode = { 'n', 't' }, desc = 'Toggle terminal' },
   },

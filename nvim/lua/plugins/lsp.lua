@@ -9,11 +9,15 @@ return {
     'neovim/nvim-lspconfig',
     config = function()
       vim.diagnostic.config({
-        virtual_text = true,
+        virtual_text = {
+          prefix = '●',
+          source = 'if_many', -- show linter name only when multiple sources disagree
+        },
         signs = true,
         underline = true,
         update_in_insert = false,
         severity_sort = true,
+        float = { source = true }, -- always show source in the floating window
       })
 
       local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
@@ -68,17 +72,27 @@ return {
           filetypes = { 'python' },
           root_markers = { 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
           capabilities = capabilities,
+          init_options = {
+            settings = { lint = { enable = true } },
+          },
         })
         vim.lsp.enable('ruff')
       end
 
-      -- Python type checking (ty)
+      -- Python type checking (ty — install with: uv tool install ty)
       if vim.fn.executable('ty') == 1 then
+        local ty_capabilities = vim.tbl_deep_extend('force', capabilities, {
+          textDocument = {
+            diagnostic = {
+              dynamicRegistration = false,
+            },
+          },
+        })
         vim.lsp.config('ty', {
           cmd = { 'ty', 'server' },
           filetypes = { 'python' },
           root_markers = { 'pyproject.toml', 'ty.toml', '.git' },
-          capabilities = capabilities,
+          capabilities = ty_capabilities,
         })
         vim.lsp.enable('ty')
       end

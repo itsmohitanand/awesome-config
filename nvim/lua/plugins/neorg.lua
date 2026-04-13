@@ -1,9 +1,6 @@
 -- ~/.config/nvim/lua/plugins/neorg.lua
--- Temporarily disabled
 
-return {}
-
---[[ return {
+return {
   'nvim-neorg/neorg',
   lazy = false,
   version = '*',
@@ -12,24 +9,12 @@ return {}
     'MunifTanjim/nui.nvim',
     'pysan3/pathlib.nvim',
     'nvim-neorg/lua-utils.nvim',
-    'nvim-treesitter/nvim-treesitter',
   },
   config = function()
-    -- Register norg parsers from rocks/pre-built paths if available
-    for _, name in ipairs { 'norg', 'norg_meta' } do
-      local path, err = package.searchpath('parser.' .. name, package.cpath)
-      if path and not err then
-        vim.treesitter.language.add(name, { path = path })
-      end
-    end
-
     require('neorg').setup({
       load = {
         -- Core modules
         ['core.defaults'] = {},
-        ['core.integrations.treesitter'] = {
-          config = { configure_parsers = false },
-        },
         ['core.concealer'] = {
           config = {
             icon_preset = 'varied',
@@ -109,4 +94,4 @@ return {}
     -- Link management
     map('n', '<leader>nrl', '<cmd>Neorg keybind norg core.esupports.hop.hop-link<CR>', { desc = '[N]eo[r]g hop [L]ink' })
   end,
-} --]]
+}

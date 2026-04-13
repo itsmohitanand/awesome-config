@@ -58,7 +58,7 @@ return {
     iron_keymap('n', '<leader>ri', 'IronInterrupt', 'Interrupt REPL')
     iron_keymap('n', '<leader>rq', 'IronExit', 'Exit REPL')
     iron_keymap('n', '<leader>rx', 'IronClear', 'Clear REPL')
-    iron_action('n', '<leader>rc', function() iron.send_motion() end, 'Send motion to REPL')
+    iron_action('n', '<leader>rc', function() iron.run_motion("send_motion") end, 'Send motion to REPL')
     iron_action('v', '<leader>rc', function() iron.visual_send() end, 'Send visual selection to REPL')
     iron_action('n', '<leader>rp', function() iron.send_paragraph() end, 'Send paragraph to REPL')
     iron_action('n', '<leader>ru', function() iron.send_until_cursor() end, 'Send until cursor to REPL')

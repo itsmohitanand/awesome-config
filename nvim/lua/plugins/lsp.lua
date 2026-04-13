@@ -148,8 +148,11 @@ return {
                   end
                 end
                 if #unique == 1 then
-                  vim.cmd('edit ' .. unique[1].filename)
-                  vim.api.nvim_win_set_cursor(0, { unique[1].lnum, unique[1].col - 1 })
+                  local item = unique[1]
+                  local bufnr = vim.fn.bufadd(item.filename)
+                  vim.fn.bufload(bufnr)
+                  vim.api.nvim_set_current_buf(bufnr)
+                  vim.api.nvim_win_set_cursor(0, { item.lnum, item.col - 1 })
                 else
                   opts.items = unique
                   vim.fn.setqflist({}, ' ', opts)

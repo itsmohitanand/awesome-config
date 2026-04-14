@@ -1,0 +1,34 @@
+layout {
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+    pane split_direction="vertical" {
+        // Left Column: Core Services
+        pane split_direction="horizontal" {
+            // Note: Added PYTHONPATH and '; exec bash' to keep panes open on failure
+            pane name="Gateway" command="bash" {
+                args "-c" "export PYTHONPATH=$PYTHONPATH:. && cd gateway_service && source .venv/bin/activate && uvicorn main:app --reload --port 8000; exec bash"
+            }
+            pane name="CRUD" command="bash" {
+                args "-c" "export PYTHONPATH=$PYTHONPATH:. && cd crud_service && source .venv/bin/activate && uvicorn main:app --reload --port 8001; exec bash"
+            }
+            pane name="Search" command="bash" {
+                args "-c" "export PYTHONPATH=$PYTHONPATH:. && cd search_service && source .venv/bin/activate && uvicorn main:app --reload --port 8002; exec bash"
+            }
+        }
+        // Right Column: AI, Frontend, and your Terminal
+        pane split_direction="horizontal" {
+            pane name="AI Service" command="bash" {
+                args "-c" "cd ai_service && source .venv/bin/activate && uvicorn main:app --reload --port 8081; exec bash"
+            }
+            pane name="Frontend" command="bash" {
+                args "-c" "cd frontend && npm run dev; exec bash"
+            }
+            // Focus=true means this is where your cursor starts
+            pane name="Terminal" focus=true
+        }
+    }
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}

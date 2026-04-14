@@ -115,6 +115,18 @@ map('n', 'gd', vim.lsp.buf.definition, { desc = 'LSP: Go to definition' })
 map('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'LSP: Code actions' })
 
 ---------------------
+-- FILE PATH
+---------------------
+-- Copy absolute path to clipboard
+vim.keymap.set('n', '<leader>fp', ":let @+ = expand('%:p')<CR>", { desc = 'Copy current file path' })
+
+-- Copy relative path to clipboard
+vim.keymap.set('n', '<leader>fr', ":let @+ = expand('%')<CR>", { desc = 'Copy current file relative path' })
+
+-- Copy filename only to clipboard
+vim.keymap.set('n', '<leader>fn', ":let @+ = expand('%:t')<CR>", { desc = 'Copy current file name' })
+
+---------------------
 -- LSP MAPPINGS (Insert Mode)
 ---------------------
 -- Show arguments while you are typing inside brackets

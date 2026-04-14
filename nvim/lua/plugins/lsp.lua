@@ -120,6 +120,10 @@ return {
         },
       })
 
+      -- Disable pyright / basedpyright (use ruff + ty instead)
+      vim.lsp.enable('pyright', false)
+      vim.lsp.enable('basedpyright', false)
+
       -- Enable LSP servers
       vim.lsp.enable({ 'lua_ls', 'clangd', 'texlab' })
 

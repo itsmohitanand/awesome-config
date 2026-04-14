@@ -1,0 +1,72 @@
+[
+  // ── INSERT MODE ────────────────────────────────────────────────────────────
+  {
+    "context": "vim_mode == insert",
+    "bindings": {
+      // jk → escape to normal mode
+      "j k": "vim::NormalBefore",
+      // ctrl+backspace → delete previous word
+      "ctrl-backspace": "editor::DeleteToPreviousWordStart"
+    }
+  },
+
+  // ── NORMAL MODE ────────────────────────────────────────────────────────────
+  {
+    "context": "vim_mode == normal && !menu",
+    "bindings": {
+      // Pane navigation — replaces <C-w>hjkl sequences
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight",
+
+      // Tab / buffer navigation — overrides vim's H (top-of-screen) / L (bottom-of-screen)
+      "shift-h": "pane::ActivatePrevItem",
+      "shift-l": "pane::ActivateNextItem",
+
+      // Buffer management
+      "space b d": "pane::CloseActiveItem",
+
+      // File saving & quitting
+      "space s": "workspace::Save",
+      "space q": "pane::CloseActiveItem",
+
+      // LSP: hover docs (K) — overrides vim's man-page lookup
+      "shift-k": "editor::Hover",
+
+      // LSP: show inline diagnostic / hover
+      "space c d": "editor::Hover",
+
+      // LSP: code actions
+      "space c a": "editor::ToggleCodeActions",
+
+      // Pickers (snacks.nvim equivalents)
+      "space f f": "file_finder::Toggle",         // <leader>ff  find files
+      "space e":   "project_panel::ToggleFocus",  // <leader>e   explorer
+      "space x d": "diagnostics::Deploy",          // <leader>xd  diagnostics panel
+
+      // Terminal (snacks terminal)
+      "ctrl-`": "terminal_panel::ToggleFocus"     // <C-`> toggle terminal
+    }
+  },
+
+  // ── VISUAL MODE ────────────────────────────────────────────────────────────
+  {
+    "context": "vim_mode == visual && !menu",
+    "bindings": {
+      // Move selected lines up / down — overrides vim's J (join) / K (man-page)
+      "shift-j": "editor::MoveLineDown",
+      "shift-k": "editor::MoveLineUp"
+    }
+  },
+
+  // ── NORMAL + VISUAL ────────────────────────────────────────────────────────
+  {
+    "context": "VimControl && !menu",
+    "bindings": {
+      // Toggle line / selection comments (ctrl+/ or ctrl+_)
+      "ctrl-/": "editor::ToggleComments",
+      "ctrl-_": "editor::ToggleComments"
+    }
+  }
+]

@@ -21,6 +21,10 @@ ln -sf "$DOTFILES/starship/starship.toml"             ~/.config/starship.toml
 ln -sf "$DOTFILES/nvim/init.lua"                      ~/.config/nvim/init.lua
 ln -sf "$DOTFILES/nvim/lua"                           ~/.config/nvim/lua
 
+# Zed
+mkdir -p ~/.config/zed
+ln -sf "$DOTFILES/zed/keymap.json"                    ~/.config/zed/keymap.json
+
 # Shell config (source this from ~/.zshrc or ~/.bashrc)
 ln -sf "$DOTFILES/.modern_shell_config"               ~/.modern_shell_config
 

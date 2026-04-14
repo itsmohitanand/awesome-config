@@ -282,8 +282,8 @@ simplified_ui false
 // Choose the theme that is specified in the themes section.
 // Default: default
 //
-// To switch themes: switch-theme <name>  (cyberdream | everblush)
-theme "cyberdream"
+// To switch themes: switch-theme <name>  (poimandres | cyberdream | everblush)
+theme "poimandres"
  
 // Choose the base input mode of zellij.
 // Default: normal
@@ -536,6 +536,19 @@ copy_command "xclip -selection clipboard" // x11
 // Themes
 // ============================================================================
 themes {
+    poimandres {
+        fg      "#A6ACCD"
+        bg      "#1B1E28"
+        black   "#171922"
+        red     "#D0679D"
+        green   "#5DE4C7"
+        yellow  "#FFFAC2"
+        blue    "#ADD7FF"
+        magenta "#D0679D"
+        cyan    "#89DDFF"
+        white   "#E4F0FB"
+        orange  "#5FB3A1"
+    }
     cyberdream {
         fg      "#ffffff"
         bg      "#16181a"

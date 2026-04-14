@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # switch-theme <name>
 # Switches kitty, starship, neovim, and zellij to the named theme in one command.
-# Available themes: cyberdream | everblush
+# Available themes: poimandres | cyberdream | everblush
 
 set -e
 

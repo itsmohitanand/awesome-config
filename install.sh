@@ -6,6 +6,7 @@ mkdir -p ~/.config/kitty/themes ~/.config/zellij/layouts ~/.config/nvim
 
 # Kitty
 ln -sf "$DOTFILES/kitty/kitty.conf"                   ~/.config/kitty/kitty.conf
+ln -sf "$DOTFILES/kitty/themes/poimandres.conf"       ~/.config/kitty/themes/poimandres.conf
 ln -sf "$DOTFILES/kitty/themes/cyberdream.conf"       ~/.config/kitty/themes/cyberdream.conf
 ln -sf "$DOTFILES/kitty/themes/everblush.conf"        ~/.config/kitty/themes/everblush.conf
 
@@ -37,4 +38,4 @@ echo ""
 echo "Add to your ~/.zshrc or ~/.bashrc:"
 echo "  source ~/.modern_shell_config"
 echo ""
-echo "Switch themes with:  switch-theme cyberdream | everblush"
+echo "Switch themes with:  switch-theme poimandres | cyberdream | everblush"

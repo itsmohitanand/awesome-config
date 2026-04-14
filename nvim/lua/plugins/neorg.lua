@@ -9,6 +9,8 @@ return {
     'MunifTanjim/nui.nvim',
     'pysan3/pathlib.nvim',
     'nvim-neorg/lua-utils.nvim',
+    -- neorg's core.integrations.treesitter requires the nvim-treesitter Lua API
+    { 'nvim-treesitter/nvim-treesitter', config = false },
   },
   config = function()
     require('neorg').setup({

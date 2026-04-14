@@ -3,7 +3,7 @@
 -- -----------------------------------------------------------------------------
 
 -- Theme — change this string to switch colorscheme; run switch-theme to sync all apps
-local theme = 'cyberdream'
+local theme = 'poimandres'
 
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
@@ -63,8 +63,9 @@ require('keymaps')
 require('lazy').setup(
 {
   -- Colorschemes (active one set by `theme` variable above)
-  { 'scottmckendry/cyberdream.nvim', lazy = false, priority = 1000 },
-  { 'Everblush/nvim', name = 'everblush', lazy = false, priority = 999 },
+  { 'olivercederborg/poimandres.nvim', lazy = false, priority = 1000 },
+  { 'scottmckendry/cyberdream.nvim', lazy = false, priority = 999 },
+  { 'Everblush/nvim', name = 'everblush', lazy = false, priority = 998 },
   
   -- Quality of Life
   { 'tpope/vim-commentary' },
@@ -76,3 +77,18 @@ require('lazy').setup(
 })
 
 vim.cmd.colorscheme(theme)
+
+if theme == 'poimandres' then
+  -- module names (numpy, os, pathlib…)  → bright blue
+  vim.api.nvim_set_hl(0, '@module',        { fg = '#ADD7FF' })
+  vim.api.nvim_set_hl(0, '@module.python', { fg = '#ADD7FF' })
+  -- the alias / bound name (np, pd, plt…) → keep as foreground but bold so it reads differently
+  vim.api.nvim_set_hl(0, '@variable',      { fg = '#E4F0FB' })
+  -- function calls  → teal
+  vim.api.nvim_set_hl(0, '@function',      { fg = '#5DE4C7' })
+  vim.api.nvim_set_hl(0, '@function.call', { fg = '#5DE4C7' })
+  -- class / type names  → softer blue
+  vim.api.nvim_set_hl(0, '@type',          { fg = '#89DDFF' })
+  -- parameters / arguments  → blue-gray so they don't shout
+  vim.api.nvim_set_hl(0, '@variable.parameter', { fg = '#767C9D' })
+end

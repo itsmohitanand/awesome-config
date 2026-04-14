@@ -28,7 +28,7 @@ $cmd_duration\
 $line_break\
 $character"""
 
-palette = 'cyberdream'
+palette = 'poimandres'
 
 [os]
 disabled = false
@@ -164,6 +164,20 @@ style = "bg:lavender"
 disabled = false
 show_notifications = true
 min_time_to_notify = 45000
+
+[palettes.poimandres]
+red      = "#D0679D"
+peach    = "#5FB3A1"
+yellow   = "#FFFAC2"
+green    = "#5DE4C7"
+sapphire = "#ADD7FF"
+lavender = "#89DDFF"
+teal     = "#5DE4C7"
+text     = "#E4F0FB"
+subtext1 = "#A6ACCD"
+surface0 = "#303340"
+base     = "#1B1E28"
+crust    = "#171922"
 
 [palettes.cyberdream]
 red = "#ff6e5e"

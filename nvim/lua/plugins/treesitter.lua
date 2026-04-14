@@ -1,23 +1,11 @@
-return {
-  'nvim-treesitter/nvim-treesitter',
-  build = ':TSUpdate',
-  config = function()
-    -- New API: nvim-treesitter is now purely a parser installer.
-    -- Highlight and indent are built into nvim 0.11+.
-    require('nvim-treesitter').setup()
-
-    -- Install parsers (runs async, skips already-installed ones)
-    local parsers = {
-      'c', 'cpp', 'lua', 'vim', 'vimdoc',
-      'bash', 'markdown', 'markdown_inline', 'python',
-    }
-    require('nvim-treesitter.install').install(parsers)
-
-    -- Enable treesitter highlight for every buffer that has a parser
-    vim.api.nvim_create_autocmd('FileType', {
-      callback = function()
-        pcall(vim.treesitter.start)
-      end,
-    })
+-- nvim 0.12 ships treesitter built-in; no plugin needed for parser management.
+-- Bundled parsers: c, lua, vim, vimdoc, query, markdown, markdown_inline
+-- Extra parsers (site/parser/): python, norg, norg_meta
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { '*', 'norg' },
+  callback = function()
+    pcall(vim.treesitter.start)
   end,
-}
+})
+
+return {}

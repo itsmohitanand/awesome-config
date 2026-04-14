@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>nvim keymaps — deskmat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1b1e28;
+      --surface:  #222533;
+      --surface2: #272a3a;
+      --border:   #2e3244;
+      --border2:  #3d4166;
+      --fg:       #e4f0fb;
+      --fg-dim:   #a6accd;
+      --fg-muted: #767c9d;
+      /* poimandres accent palette */
+      --blue:     #add7ff;
+      --sky:      #89ddff;
+      --teal:     #5de4c7;
+      --pink:     #d0679d;
+      --lpink:    #fcc5e9;
+      --yellow:   #fffac2;
+      --lavender: #a6accd;
+      --muted:    #767c9d;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 30px 36px 22px;
+      min-width: 1400px;
+    }
+
+    /* ── Header ──────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-size: 1.7em;
+      font-weight: 900;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--blue) 0%, var(--pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .badges { display: flex; gap: 10px; }
+    .badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.67em;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 4px 10px;
+      color: var(--fg-dim);
+    }
+
+    /* ── 4-column layout ─────────────────────────── */
+    .layout {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── Card ────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      font-size: 0.65em;
+      font-weight: 700;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+    .card-header svg { flex-shrink: 0; width: 13px; height: 13px; }
+    .card-body { padding: 5px 0 7px; }
+
+    /* ── Binding row ─────────────────────────────── */
+    .row {
+      display: flex;
+      align-items: center;
+      padding: 2.5px 14px;
+      gap: 10px;
+      min-height: 22px;
+    }
+    .row:hover { background: var(--surface2); }
+    .keys {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      min-width: 116px;
+    }
+    .key {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.67em;
+      font-weight: 500;
+      padding: 1px 6px 2px;
+      border-radius: 4px;
+      border: 1px solid var(--border2);
+      border-bottom-width: 2px;
+      background: var(--surface2);
+      color: var(--fg-dim);
+      white-space: nowrap;
+      line-height: 1.5;
+      display: inline-block;
+    }
+    .slash { font-size: 0.65em; color: var(--fg-muted); margin: 0 1px; }
+    .desc  { font-size: 0.73em; color: var(--fg-dim); line-height: 1.4; }
+    .divider { height: 1px; background: var(--border); margin: 4px 14px; }
+
+    /* ── Per-group colours (poimandres palette) ─────── */
+    .repl    .card-header { background:#252418; color:var(--yellow);   }
+    .editing .card-header { background:#1a2323; color:var(--teal);     }
+    .git     .card-header { background:#271923; color:var(--lpink);    }
+    .harpoon .card-header { background:#1a2030; color:var(--blue);     }
+    .neorg   .card-header { background:#261520; color:var(--pink);     }
+    .debug   .card-header { background:#1a2030; color:var(--sky);      }
+    .lsp     .card-header { background:#1e2030; color:var(--lavender); }
+    .nav     .card-header { background:#162020; color:var(--teal);     }
+
+    .repl    .key { border-color:#484220; color:var(--yellow);   }
+    .editing .key { border-color:#1a3e38; color:var(--teal);     }
+    .git     .key { border-color:#48253a; color:var(--lpink);    }
+    .harpoon .key { border-color:#1e3050; color:var(--blue);     }
+    .neorg   .key { border-color:#481535; color:var(--pink);     }
+    .debug   .key { border-color:#1a3050; color:var(--sky);      }
+    .lsp     .key { border-color:#2e3055; color:var(--lavender); }
+    .nav     .key { border-color:#1a3e38; color:var(--teal);     }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    footer span {
+      font-size: 0.61em;
+      color: var(--fg-muted);
+      letter-spacing: 0.09em;
+      font-family: 'Space Mono', monospace;
+    }
+    .dot { color: var(--border2); margin: 0 7px; }
+
+    /* ── Wallpaper: center content on large screens ── */
+    @media (min-height: 900px) {
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+
+    /* ── Print / export ──────────────────────────── */
+    @page {
+      size: 900mm 400mm landscape;
+      margin: 0;
+    }
+    @media print {
+      /* Force background colours — must be on in Chrome print dialog too */
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body {
+        min-width: unset;
+        min-height: unset;
+        display: block;
+        width: 900mm;
+        padding: 16mm 18mm 12mm;
+        overflow: hidden;
+      }
+      header  { margin-bottom: 12mm; padding-bottom: 7mm; }
+      .layout { gap: 7mm; }
+      .card   { border-radius: 5mm; }
+      footer  { margin-top: 5mm; padding-top: 6mm; }
+      html    { font-size: 10pt; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>nvim keymaps</h1>
+  <div class="badges">
+    <span class="badge">SPC = &lt;Space&gt; leader</span>
+    <span class="badge">M = Alt</span>
+    <span class="badge">C = Ctrl</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ══ COL 1 : REPL + Editing ══════════════════ -->
+  <div class="col">
+
+    <div class="card repl">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        REPL — Iron
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rr</span></div><span class="desc">Toggle REPL</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rR</span></div><span class="desc">Restart REPL</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rF</span></div><span class="desc">Focus REPL window</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rh</span></div><span class="desc">Hide REPL</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rq</span></div><span class="desc">Exit / close REPL</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rl</span></div><span class="desc">Send current line</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rb</span></div><span class="desc">Send code block (# %%)</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rj</span></div><span class="desc">Send block + move to next</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rc</span></div><span class="desc">Send motion / visual</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">ru</span></div><span class="desc">Send until cursor</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rf</span></div><span class="desc">Send entire file</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">ri</span></div><span class="desc">Interrupt (Ctrl-C)</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rx</span></div><span class="desc">Clear REPL output</span></div>
+        <div class="row"><div class="keys"><span class="key">F5</span></div><span class="desc">Save &amp; run Python</span></div>
+      </div>
+    </div>
+
+    <div class="card editing">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editing &amp; UI
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">jk</span></div><span class="desc">Exit insert mode</span></div>
+        <div class="row"><div class="keys"><span class="key">C-\</span></div><span class="desc">Toggle comment (n / v)</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">C-`</span></div><span class="desc">Toggle floating terminal</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">s</span></div><span class="desc">Save file</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ COL 2 : Git + Harpoon ═══════════════════ -->
+  <div class="col">
+
+    <div class="card git">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9v6M15.7 6.7 8.3 11.3"/></svg>
+        Git
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gg</span></div><span class="desc">Open LazyGit</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gb</span></div><span class="desc">Blame current line</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gp</span></div><span class="desc">Preview hunk</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gs</span></div><span class="desc">Stage hunk</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gr</span></div><span class="desc">Reset hunk</span></div>
+        <div class="row"><div class="keys"><span class="key">]c</span><span class="slash">/</span><span class="key">[c</span></div><span class="desc">Next / prev hunk</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gh</span></div><span class="desc">File history (diffview)</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gH</span></div><span class="desc">Repo history</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gd</span></div><span class="desc">Diff working tree</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">gx</span></div><span class="desc">Close diffview</span></div>
+      </div>
+    </div>
+
+    <div class="card harpoon">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Harpoon &amp; Navigation
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">a</span></div><span class="desc">Pin current file</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">h</span></div><span class="desc">Harpoon menu</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">1</span><span class="slash">–</span><span class="key">5</span></div><span class="desc">Jump to pin 1 – 5</span></div>
+        <div class="row"><div class="keys"><span class="key">M-n</span><span class="slash">/</span><span class="key">M-p</span></div><span class="desc">Cycle pins fwd / back</span></div>
+        <div class="row"><div class="keys"><span class="key">S-h</span><span class="slash">/</span><span class="key">S-l</span></div><span class="desc">Prev / next buffer</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">bd</span></div><span class="desc">Close buffer</span></div>
+        <div class="row"><div class="keys"><span class="key">C-h</span><span class="slash">/</span><span class="key">C-l</span></div><span class="desc">Navigate left / right split</span></div>
+        <div class="row"><div class="keys"><span class="key">C-j</span><span class="slash">/</span><span class="key">C-k</span></div><span class="desc">Navigate down / up split</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ COL 3 : Neorg + Debug ════════════════════ -->
+  <div class="col">
+
+    <div class="card neorg">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Neorg — Notes
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nrj</span></div><span class="desc">Journal — today</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nry</span></div><span class="desc">Journal — yesterday</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nrt</span></div><span class="desc">Journal — tomorrow</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nrn</span></div><span class="desc">Workspace: notes</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nrh</span></div><span class="desc">Workspace: home</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nro</span></div><span class="desc">Workspace: office</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nrw</span></div><span class="desc">Pick workspace</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nri</span></div><span class="desc">Index</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nrc</span></div><span class="desc">Table of contents</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">nrr</span></div><span class="desc">Return</span></div>
+      </div>
+    </div>
+
+    <div class="card debug">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Debug &amp; Diagnostics
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">db</span></div><span class="desc">Toggle breakpoint</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">dc</span></div><span class="desc">Start / continue</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">di</span></div><span class="desc">Step into</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">do</span></div><span class="desc">Step over</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">du</span></div><span class="desc">Toggle debug UI</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">]d</span><span class="slash">/</span><span class="key">[d</span></div><span class="desc">Next / prev diagnostic</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">cd</span></div><span class="desc">Float diagnostic</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">cx</span></div><span class="desc">Toggle diagnostics</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ COL 4 : LSP + Navigation ════════════════ -->
+  <div class="col">
+
+    <div class="card lsp">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        LSP &amp; Code
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">gd</span></div><span class="desc">Go to definition</span></div>
+        <div class="row"><div class="keys"><span class="key">gr</span></div><span class="desc">Show references</span></div>
+        <div class="row"><div class="keys"><span class="key">K</span></div><span class="desc">Hover documentation</span></div>
+        <div class="row"><div class="keys"><span class="key">C-k</span></div><span class="desc">Signature help (insert)</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">rn</span></div><span class="desc">Rename symbol</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">ca</span></div><span class="desc">Code action</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">cf</span></div><span class="desc">Format buffer</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">C-Space</span></div><span class="desc">Trigger completion</span></div>
+        <div class="row"><div class="keys"><span class="key">C-n</span><span class="slash">/</span><span class="key">C-p</span></div><span class="desc">Next / prev item</span></div>
+        <div class="row"><div class="keys"><span class="key">Enter</span></div><span class="desc">Accept completion</span></div>
+        <div class="row"><div class="keys"><span class="key">C-b</span><span class="slash">/</span><span class="key">C-f</span></div><span class="desc">Scroll docs up / down</span></div>
+      </div>
+    </div>
+
+    <div class="card nav">
+      <div class="card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Navigation &amp; Search
+      </div>
+      <div class="card-body">
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">ff</span></div><span class="desc">Find files (incl. hidden)</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">fg</span></div><span class="desc">Live grep</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">fb</span></div><span class="desc">Find buffers</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">ft</span></div><span class="desc">Find TODOs</span></div>
+        <div class="divider"></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">xd</span></div><span class="desc">Diagnostics picker</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">e</span></div><span class="desc">Toggle file explorer</span></div>
+        <div class="row"><div class="keys"><span class="key">SPC</span><span class="key">sr</span></div><span class="desc">Search &amp; replace</span></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <span>mohit.anand</span>
+  <span>snacks <span class="dot">·</span> blink.cmp <span class="dot">·</span> gitsigns <span class="dot">·</span> diffview <span class="dot">·</span> harpoon2 <span class="dot">·</span> iron <span class="dot">·</span> dap <span class="dot">·</span> neorg <span class="dot">·</span> vimtex</span>
+  <span>2026</span>
+</footer>
+
+</body>
+</html>

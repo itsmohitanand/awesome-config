@@ -5,6 +5,8 @@ return {
     delay = 0,
     icons = { rules = false },
     spec = {
+      { '<leader>g',  group = 'Git' },
+      { '<leader>h',  group = 'Harpoon' },
       { '<leader>r',  group = 'REPL' },
       { '<leader>tk', group = 'Telekasten' },
       { '<leader>nr', group = 'Neorg' },

@@ -53,6 +53,7 @@ vim.opt.rtp:prepend(lazypath)
 -- -----------------------------------------------------------------------------
 
 require('core.options')
+require('core.sticky_scroll')
 require('keymaps')
 
 -- -----------------------------------------------------------------------------
@@ -64,15 +65,6 @@ require('lazy').setup(
   -- Colorschemes (active one set by `theme` variable above)
   { 'scottmckendry/cyberdream.nvim', lazy = false, priority = 1000 },
   { 'Everblush/nvim', name = 'everblush', lazy = false, priority = 999 },
-  
-  -- Statusline
-  {
-    'nvim-lualine/lualine.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = function()
-      require('lualine').setup()
-    end,
-  },
   
   -- Quality of Life
   { 'tpope/vim-commentary' },

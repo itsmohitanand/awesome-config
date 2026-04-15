@@ -59,5 +59,15 @@ return {
     iron_action('n', '<leader>rj', function() iron.send_code_block(true) end, 'Send code block and move')
     iron_action('n', '<leader>rF', function() iron.focus_on(vim.bo.filetype) end, 'Focus REPL')
     iron_action('n', '<leader>rh', function() iron.hide_repl() end, 'Hide REPL')
+
+    -- Escape terminal mode and jump back to code window, only inside iron REPL buffers
+    vim.api.nvim_create_autocmd('TermOpen', {
+      callback = function(ev)
+        local name = vim.api.nvim_buf_get_name(ev.buf)
+        if name:match('ipython') then
+          vim.keymap.set('t', '<C-space>', '<C-\\><C-n><C-w>w', { buffer = ev.buf, desc = 'Escape REPL and focus code' })
+        end
+      end,
+    })
   end,
 }

@@ -44,12 +44,11 @@ Leader key: `Space`
 | `<leader>q` | Quit | keymaps.lua |
 | `<F5>` | Save and run Python file | keymaps.lua |
 
-### File Explorer (nvim-tree)
+### File Explorer (snacks)
 
 | Key | Description | Source |
 | --- | --- | --- |
-| `<leader>e` | Toggle file explorer | keymaps.lua |
-| `<leader>f` | Find file in explorer | keymaps.lua |
+| `<leader>e` | Toggle file explorer | snacks.lua |
 
 ### Cursor Movement
 
@@ -71,23 +70,31 @@ Leader key: `Space`
 | `<leader>p` | Paste from system clipboard (after) | keymaps.lua |
 | `<leader>P` | Paste from system clipboard (before) | keymaps.lua |
 
-### LSP
+### LSP / Code (`<leader>c`)
 
 | Key | Description | Source |
 | --- | --- | --- |
-| `K` | Show hover documentation | keymaps.lua, lsp.lua |
-| `gd` | Go to definition | keymaps.lua, lsp.lua |
+| `K` | Show hover documentation | lsp.lua |
+| `gd` | Go to definition | lsp.lua |
 | `gr` | Show references | lsp.lua |
-| `<leader>ca` | Code actions | keymaps.lua, lsp.lua |
-| `<leader>rn` | Rename symbol | lsp.lua |
+| `<leader>ca` | Code actions | lsp.lua |
+| `<leader>cr` | Rename symbol | lsp.lua |
+| `<leader>cd` | Floating diagnostic | keymaps.lua |
+| `<leader>cl` | Diagnostics list (picker) | snacks.lua |
+| `<leader>cx` | Toggle diagnostics | keymaps.lua |
+| `]d` / `[d` | Next / prev diagnostic | keymaps.lua |
 
-### Telescope (Fuzzy Finder)
+### File / Find (snacks)
 
 | Key | Description | Source |
 | --- | --- | --- |
-| `<leader>ff` | Find files | telescope.lua |
-| `<leader>fg` | Live grep | telescope.lua |
-| `<leader>fb` | Find buffers | telescope.lua |
+| `<leader>ff` | Find files | snacks.lua |
+| `<leader>fg` | Live grep | snacks.lua |
+| `<leader>fb` | Find buffers | snacks.lua |
+| `<leader>fs` | Find symbols (LSP) | snacks.lua |
+| `<leader>fp` | Copy file path (absolute) | keymaps.lua |
+| `<leader>fr` | Copy file relative path | keymaps.lua |
+| `<leader>fn` | Copy file name | keymaps.lua |
 
 ### Debugging (DAP)
 
@@ -114,6 +121,7 @@ Leader key: `Space`
 | `<leader>rj` | Send code block and move | iron.lua |
 | `<leader>ri` | Interrupt REPL | iron.lua |
 | `<leader>rq` | Exit REPL | iron.lua |
+| `<leader>rQ` | Force close REPL (kills process) | iron.lua |
 | `<leader>rx` | Clear REPL | iron.lua |
 | `<leader>rF` | Focus REPL window | iron.lua |
 | `<leader>rh` | Hide REPL window | iron.lua |

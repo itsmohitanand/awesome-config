@@ -50,6 +50,15 @@ return {
     iron_action('n', '<leader>rl', function() iron.send_line() end, 'Send line to REPL')
     iron_action('n', '<leader>ri', function() iron.send_interrupt() end, 'Interrupt REPL')
     iron_action('n', '<leader>rq', function() iron.close_repl() end, 'Exit REPL')
+    iron_action('n', '<leader>rQ', function()
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.bo[buf].buftype == 'terminal' then
+          local job_id = vim.b[buf].terminal_job_id
+          if job_id then vim.fn.jobstop(job_id) end
+        end
+      end
+      iron.close_repl()
+    end, 'Force close REPL')
     iron_action('n', '<leader>rx', function() iron.clear() end, 'Clear REPL')
     iron_action('n', '<leader>rc', function() iron.send_motion() end, 'Send motion to REPL')
     iron_action('v', '<leader>rc', function() iron.visual_send() end, 'Send visual selection to REPL')

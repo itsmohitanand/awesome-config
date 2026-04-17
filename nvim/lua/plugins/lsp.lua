@@ -166,7 +166,7 @@ return {
             })
           end, { desc = 'Go to Definition' })
           bufmap('n', 'K', vim.lsp.buf.hover, { desc = 'Show Hover Docs' })
-          bufmap('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename Symbol' })
+          bufmap('n', '<leader>cr', vim.lsp.buf.rename, { desc = 'Rename Symbol' })
           bufmap('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'Code Action' })
           bufmap('n', 'gr', vim.lsp.buf.references, { desc = 'Show References' })
           bufmap('i', '<C-k>', vim.lsp.buf.signature_help, { desc = 'Show Signature Help' })

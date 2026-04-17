@@ -126,6 +126,14 @@ alias dprune='docker system prune -f'
 # ============================================================================
 alias vi='nvim'
 alias vim='nvim'
+nvx() {
+    local env_file=~/.secrets/nvim-secrets.env
+    if [ -f "$env_file" ]; then
+        uv run --env-file "$env_file" nvim "$@"
+    else
+        uv run nvim "$@"
+    fi
+}
 alias zm='zellij'
 alias tm='tmux'
 

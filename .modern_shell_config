@@ -183,5 +183,26 @@ topcmds() {
 # Print a horizontal rule
 hr() { printf '%*s\n' "${COLUMNS:-80}" '' | tr ' ' '-'; }
 
+# Quick note in /data/notes/.
+#   note            -> opens today's journal:  /data/notes/daily/YYYY-MM-DD.typ
+#   note <title...> -> opens a topical note:   /data/notes/topics/<slug>.typ
+# An agent reorganizes (and uses inbox/) periodically.
+note() {
+    local notes_dir="/data/notes"
+    [ -d "$notes_dir" ] || { echo "note: $notes_dir does not exist" >&2; return 1; }
+    local target
+    if [ $# -eq 0 ]; then
+        mkdir -p "$notes_dir/daily"
+        target="$notes_dir/daily/$(date +%Y-%m-%d).typ"
+    else
+        local slug
+        slug=$(echo "$*" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | sed 's/--*/-/g; s/^-//; s/-$//')
+        [ -z "$slug" ] && { echo "note: empty title" >&2; return 1; }
+        mkdir -p "$notes_dir/topics"
+        target="$notes_dir/topics/$slug.typ"
+    fi
+    nvim "$target"
+}
+
 # Alert for long-running commands (notify-send)
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'

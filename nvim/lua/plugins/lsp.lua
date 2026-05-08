@@ -35,7 +35,7 @@ return {
 
       -- Install LSP servers via Mason
       require('mason-lspconfig').setup({
-        ensure_installed = { 'clangd', 'lua_ls', 'stylua', 'texlab' },
+        ensure_installed = { 'clangd', 'lua_ls', 'stylua', 'texlab', 'tinymist' },
       })
 
       -- Modern nvim 0.11+ LSP configuration using vim.lsp.config
@@ -120,12 +120,25 @@ return {
         },
       })
 
+      -- Typst LSP (tinymist — successor to typst-lsp)
+      vim.lsp.config('tinymist', {
+        cmd = { vim.fn.stdpath('data') .. '/mason/bin/tinymist' },
+        filetypes = { 'typst' },
+        root_markers = { 'typst.toml', '.git' },
+        capabilities = capabilities,
+        settings = {
+          formatterMode = 'typstyle',
+          exportPdf = 'onSave',
+          semanticTokens = 'enable',
+        },
+      })
+
       -- Disable pyright / basedpyright (use ruff + ty instead)
       vim.lsp.enable('pyright', false)
       vim.lsp.enable('basedpyright', false)
 
       -- Enable LSP servers
-      vim.lsp.enable({ 'lua_ls', 'clangd', 'texlab' })
+      vim.lsp.enable({ 'lua_ls', 'clangd', 'texlab', 'tinymist' })
 
       -- LSP keybindings (using LspAttach autocmd - the modern way)
       vim.api.nvim_create_autocmd('LspAttach', {

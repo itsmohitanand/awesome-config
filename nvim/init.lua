@@ -53,6 +53,7 @@ vim.opt.rtp:prepend(lazypath)
 -- -----------------------------------------------------------------------------
 
 require('core.options')
+require('core.ui2')
 require('core.sticky_scroll')
 require('keymaps')
 

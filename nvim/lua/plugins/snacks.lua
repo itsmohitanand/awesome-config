@@ -33,7 +33,8 @@ return {
     },
     lazygit   = { enabled = true },
     notifier  = { enabled = true, timeout = 3000 },
-    indent    = { enabled = true },
+    indent    = { enabled = false },
+    scope     = { enabled = false },
     bigfile   = { enabled = true },
     terminal  = {
       enabled = true,
@@ -43,13 +44,10 @@ return {
       },
     },
     image     = { enabled = false }, -- zellij does not support kitty graphics protocol
-    input     = { enabled = true },  -- required for vim.ui.select override
+    input     = { enabled = false }, -- ui2 handles input/dialogs natively
   },
   config = function(_, opts)
     require('snacks').setup(opts)
-    -- Wire vim.ui overrides after snacks is fully initialised
-    vim.ui.select = Snacks.picker.select
-    vim.ui.input  = Snacks.input
   end,
   keys = {
     { '<leader>ff', function() Snacks.picker.files({ hidden = true }) end, desc = 'Find files' },

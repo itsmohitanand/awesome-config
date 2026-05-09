@@ -128,10 +128,11 @@ alias vi='nvim'
 alias vim='nvim'
 nvx() {
     local env_file=~/.secrets/nvim-secrets.env
+    local py_path="${PYTHONPATH:+$PYTHONPATH:}$PWD"
     if [ -f "$env_file" ]; then
-        uv run --env-file "$env_file" nvim "$@"
+        PYTHONPATH="$py_path" uv run --env-file "$env_file" nvim "$@"
     else
-        uv run nvim "$@"
+        PYTHONPATH="$py_path" uv run nvim "$@"
     fi
 }
 alias zm='zellij'

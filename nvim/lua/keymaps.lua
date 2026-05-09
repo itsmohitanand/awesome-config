@@ -131,3 +131,8 @@ vim.keymap.set('n', '<leader>fn', ":let @+ = expand('%:t')<CR>", { desc = 'Copy 
 ---------------------
 -- Show arguments while you are typing inside brackets
 map('i', '<C-k>', vim.lsp.buf.signature_help, { desc = 'LSP: Show signature help' })
+
+---------------------
+-- TERMINAL MAPPINGS
+---------------------
+vim.keymap.set('t', '<M-e>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })

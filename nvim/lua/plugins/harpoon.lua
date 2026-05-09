@@ -12,7 +12,7 @@ return {
     end, { desc = 'Harpoon menu' })
 
     -- Add current file
-    vim.keymap.set('n', '<leader>a', function()
+    vim.keymap.set('n', '<leader>ha', function()
       harpoon:list():add()
       local name = vim.fn.expand('%:t')
       Snacks.notify('Pinned: ' .. name)

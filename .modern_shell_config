@@ -184,12 +184,11 @@ topcmds() {
 # Print a horizontal rule
 hr() { printf '%*s\n' "${COLUMNS:-80}" '' | tr ' ' '-'; }
 
-# Quick note in /data/notes/.
-#   note            -> opens today's journal:  /data/notes/daily/YYYY-MM-DD.typ
-#   note <title...> -> opens a topical note:   /data/notes/topics/<slug>.typ
-# An agent reorganizes (and uses inbox/) periodically.
+# Quick note in ~/Documents/notes/ (its own git repo, separate from config).
+#   note            -> opens today's journal:  daily/YYYY-MM-DD.typ
+#   note <title...> -> opens a topic/project note: topics/<slug>.typ
 note() {
-    local notes_dir="/data/notes"
+    local notes_dir="$HOME/Documents/notes"
     [ -d "$notes_dir" ] || { echo "note: $notes_dir does not exist" >&2; return 1; }
     local target
     if [ $# -eq 0 ]; then

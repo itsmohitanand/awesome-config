@@ -1,4 +1,4 @@
--- Quick-notes workflow rooted at /data/notes/.
+-- Quick-notes workflow rooted at ~/Documents/notes/.
 -- Layout (seed structure; an agent reorganizes periodically):
 --   daily/YYYY-MM-DD.typ   <- today's journal
 --   topics/<slug>.typ      <- durable single-subject notes
@@ -6,9 +6,9 @@
 -- Keys:
 --   <leader>nn  open today's daily note
 --   <leader>nN  prompt for title, open topical note
--- Auto-commits any save inside /data/notes/ (no auto-push).
+-- Auto-commits any save into ~/Documents/notes/ git repo (no auto-push).
 
-local NOTES_DIR = '/data/notes'
+local NOTES_DIR = vim.fn.expand('~/Documents/notes')
 
 local function slugify(s)
   return (s:lower():gsub('[^a-z0-9]+', '-'):gsub('^%-+', ''):gsub('%-+$', ''))
@@ -38,36 +38,67 @@ end
 vim.keymap.set('n', '<leader>nn', daily_note, { desc = 'Notes: today' })
 vim.keymap.set('n', '<leader>nN', topic_note, { desc = 'Notes: new topic' })
 
--- Auto-commit on save inside /data/notes/. Async, silent on success.
-vim.api.nvim_create_autocmd('BufWritePost', {
-  group = vim.api.nvim_create_augroup('notes_autocommit', { clear = true }),
+-- Autosave .typ notes every 30 s; timer lives for the lifetime of the buffer.
+local autosave_timers = {}
+
+local function is_notes_typ(bufnr)
+  local file = vim.api.nvim_buf_get_name(bufnr)
+  return file:find('^' .. NOTES_DIR .. '/') and file:match('%.typ$')
+end
+
+local function stop_autosave(bufnr)
+  local t = autosave_timers[bufnr]
+  if t then
+    t:stop(); t:close()
+    autosave_timers[bufnr] = nil
+  end
+end
+
+local function start_autosave(bufnr)
+  if autosave_timers[bufnr] then return end
+  local uv = vim.uv or vim.loop
+  local t = uv.new_timer()
+  autosave_timers[bufnr] = t
+  t:start(30000, 30000, vim.schedule_wrap(function()
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+      stop_autosave(bufnr)
+      return
+    end
+    if vim.bo[bufnr].modified then
+      vim.api.nvim_buf_call(bufnr, function() vim.cmd('silent! write') end)
+    end
+  end))
+end
+
+local as_group = vim.api.nvim_create_augroup('notes_autosave', { clear = true })
+
+vim.api.nvim_create_autocmd({ 'BufReadPost', 'BufNewFile' }, {
+  pattern = '*.typ',
+  group = as_group,
   callback = function(args)
-    local file = vim.fn.fnamemodify(args.file, ':p')
-    if not file:find('^' .. NOTES_DIR .. '/') then return end
+    if is_notes_typ(args.buf) then start_autosave(args.buf) end
+  end,
+})
 
-    local rel = file:sub(#NOTES_DIR + 2)
-    local msg = string.format('note: %s @ %s', rel, os.date('%Y-%m-%d %H:%M'))
+vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
+  pattern = '*.typ',
+  group = as_group,
+  callback = function(args) stop_autosave(args.buf) end,
+})
 
-    vim.system({ 'git', '-C', NOTES_DIR, 'add', '--', file }, { text = true }, function(add)
-      if add.code ~= 0 then
-        vim.schedule(function()
-          vim.notify('note auto-commit: git add failed\n' .. (add.stderr or ''), vim.log.levels.ERROR)
-        end)
-        return
-      end
-      vim.system(
-        { 'git', '-C', NOTES_DIR, 'commit', '--quiet', '--only', '--', file, '-m', msg },
-        { text = true },
-        function(commit)
-          -- exit 1 with no changes staged is normal (empty save) — ignore silently.
-          if commit.code ~= 0 and commit.code ~= 1 then
-            vim.schedule(function()
-              vim.notify('note auto-commit failed\n' .. (commit.stderr or ''), vim.log.levels.ERROR)
-            end)
-          end
-        end
-      )
-    end)
+-- Auto-commit all notes changes once, just before Neovim exits.
+vim.api.nvim_create_autocmd('VimLeavePre', {
+  group = vim.api.nvim_create_augroup('notes_autocommit', { clear = true }),
+  callback = function()
+    local msg = string.format('notes: autosave @ %s', os.date('%Y-%m-%d %H:%M'))
+    -- Synchronous: we must finish before the process exits.
+    local add = vim.system({ 'git', '-C', NOTES_DIR, 'add', '-A' }, { text = true }):wait()
+    if add.code ~= 0 then return end
+    vim.system(
+      { 'git', '-C', NOTES_DIR, 'commit', '--quiet', '-m', msg },
+      { text = true }
+    ):wait()
+    -- exit 1 means nothing staged — that's fine, ignore silently.
   end,
 })
 

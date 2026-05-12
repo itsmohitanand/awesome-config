@@ -42,6 +42,11 @@ else
     alias egrep='egrep --color=auto'
 fi
 
+# Override unreadable defaults for world-writable dirs (green background → invisible
+# text in dark terminals). Trailing entries win, so this fixes ls regardless of
+# whether ~/.dircolors was loaded. Applies to ls and eza (eza falls back to LS_COLORS).
+export LS_COLORS="${LS_COLORS}:ow=01;34:tw=01;32:st=01;37"
+
 # bat replaces cat
 if command -v bat &>/dev/null; then
     alias cat='bat --paging=never'

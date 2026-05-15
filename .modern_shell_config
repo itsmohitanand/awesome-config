@@ -42,6 +42,11 @@ else
     alias egrep='egrep --color=auto'
 fi
 
+# Override unreadable defaults for world-writable dirs (green background → invisible
+# text in dark terminals). Trailing entries win, so this fixes ls regardless of
+# whether ~/.dircolors was loaded. Applies to ls and eza (eza falls back to LS_COLORS).
+export LS_COLORS="${LS_COLORS}:ow=01;34:tw=01;32:st=01;37"
+
 # bat replaces cat
 if command -v bat &>/dev/null; then
     alias cat='bat --paging=never'
@@ -185,8 +190,9 @@ topcmds() {
 hr() { printf '%*s\n' "${COLUMNS:-80}" '' | tr ' ' '-'; }
 
 # Quick note in ~/Documents/notes/ (its own git repo, separate from config).
-#   note            -> opens today's journal:  daily/YYYY-MM-DD.typ
-#   note <title...> -> opens a topic/project note: topics/<slug>.typ
+#   note                  -> opens today's journal:  daily/YYYY-MM-DD.typ
+#   note topic <title...> -> opens a topic/project note: topics/<slug>.typ
+#   note <title...>       -> shorthand for `note topic <title...>`
 note() {
     local notes_dir="$HOME/Documents/notes"
     [ -d "$notes_dir" ] || { echo "note: $notes_dir does not exist" >&2; return 1; }
@@ -195,6 +201,10 @@ note() {
         mkdir -p "$notes_dir/daily"
         target="$notes_dir/daily/$(date +%Y-%m-%d).typ"
     else
+        if [ "$1" = "topic" ]; then
+            shift
+            [ $# -eq 0 ] && { echo "note topic: missing title" >&2; return 1; }
+        fi
         local slug
         slug=$(echo "$*" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | sed 's/--*/-/g; s/^-//; s/-$//')
         [ -z "$slug" ] && { echo "note: empty title" >&2; return 1; }

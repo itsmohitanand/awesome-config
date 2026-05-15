@@ -15,8 +15,11 @@
 --   <leader>tv  PDF in Zathura (auto-reloads on save)
 --   Open either panel and keep it beside Neovim for equation previewing.
 --
--- Note: inline image rendering is intentionally skipped — zellij does not
--- support the kitty graphics protocol required by image.nvim.
+-- Layer 3 — cursor-triggered sixel preview (typst-math-preview.lua):
+--   On CursorHold inside $…$, the equation under the cursor is compiled to
+--   PNG, converted to sixel via chafa, and emitted to /dev/tty just below
+--   the line. Works in zellij (native sixel) and any sixel-capable terminal.
+--   Move the cursor away to dismiss.  :TypstMathPreviewToggle / Clear
 --
 -- Prerequisites (run once inside Neovim):
 --   :MasonInstall tinymist   — LSP + PDF builder

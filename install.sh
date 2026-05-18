@@ -20,10 +20,8 @@ ln -sf "$DOTFILES/zellij/layouts/latex-thesis.kdl"    ~/.config/zellij/layouts/l
 ln -sf "$DOTFILES/starship/starship.toml"             ~/.config/starship.toml
 
 # Neovim
-mkdir -p ~/.config/nvim/ftplugin
 ln -sf "$DOTFILES/nvim/init.lua"                      ~/.config/nvim/init.lua
 ln -sf "$DOTFILES/nvim/lua"                           ~/.config/nvim/lua
-ln -sf "$DOTFILES/nvim/ftplugin/norg.lua"             ~/.config/nvim/ftplugin/norg.lua
 
 # Zed
 mkdir -p ~/.config/zed

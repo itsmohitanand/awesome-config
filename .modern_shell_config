@@ -140,6 +140,9 @@ nvx() {
         PYTHONPATH="$py_path" uv run nvim "$@"
     fi
 }
+# opencode CLI presets — local Gemma 4 large (gemma4:26b) or small (gemma4:e4b).
+alias ocl='opencode --model ollama/gemma4:26b'
+alias ocs='opencode --model ollama/gemma4:e4b'
 alias zm='zellij'
 alias tm='tmux'
 

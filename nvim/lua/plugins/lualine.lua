@@ -29,23 +29,6 @@ return {
       return ' ' .. vim.fn.fnamemodify(venv, ':t')
     end
 
-    -- Neorg: active workspace name
-    local function neorg_workspace()
-      if vim.bo.filetype ~= 'norg' then return '' end
-      local ok, neorg = pcall(require, 'neorg')
-      if not ok then return '' end
-      local dirman = neorg.modules.get_module('core.dirman')
-      if not dirman then return '' end
-      local ws = dirman.get_current_workspace()
-      return ws and ('󱌚 ' .. ws[1]) or ''
-    end
-
-    -- Neorg: live word count
-    local function neorg_words()
-      if vim.bo.filetype ~= 'norg' then return '' end
-      return '󰈭 ' .. vim.fn.wordcount().words .. 'w'
-    end
-
     require('lualine').setup({
       options = {
         theme                = 'auto',
@@ -72,13 +55,11 @@ return {
         lualine_c = {
           { 'filename', path = 1, symbols = { modified = '●', readonly = '', unnamed = '[No Name]' } },
           python_env,
-          neorg_workspace,
         },
 
         lualine_x = {
           lsp_progress,   -- clangd indexing / ruff scanning etc.
           lsp_clients,
-          neorg_words,
           -- encoding / format only shown when non-standard
           { 'encoding',   cond = function() return vim.bo.fileencoding ~= '' and vim.bo.fileencoding ~= 'utf-8' end },
           { 'fileformat', cond = function() return vim.bo.fileformat ~= 'unix' end },

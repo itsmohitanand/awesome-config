@@ -7,7 +7,7 @@ return {
       ui_select = true,
       actions = {
         -- snacks tries to open files in the current window; if that window has
-        -- winfixbuf (e.g. Avante sidebar), find a normal window first
+        -- winfixbuf (e.g. a sidebar terminal), find a normal window first
         jump = function(picker, item)
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             if not vim.wo[win].winfixbuf then

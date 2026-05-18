@@ -43,38 +43,42 @@ end
 return {
   'nickjvandyke/opencode.nvim',
   version = '*',
+  -- opencode.nvim >= 0.10 dropped require('opencode').setup(); config now
+  -- comes from vim.g.opencode_opts (deep-merged with defaults at load).
+  init = function()
+    vim.g.opencode_opts = {
+      server = {
+        start = function()
+          if not ollama_running() then
+            vim.notify(
+              'ollama daemon is not running (127.0.0.1:11434 unreachable).\n'
+                .. 'Start it: sudo systemctl start ollama   (or: ollama serve)',
+              vim.log.levels.WARN,
+              { title = 'opencode' }
+            )
+            return
+          end
+          local model, err = pick_ollama_model()
+          if not model then
+            vim.notify('opencode: ' .. err, vim.log.levels.WARN, { title = 'opencode' })
+            return
+          end
+          require('opencode.terminal').open(
+            'opencode --port --model ' .. model,
+            {
+              split = 'right',
+              width = math.floor(vim.o.columns * 0.4),
+            }
+          )
+        end,
+      },
+    }
+  end,
   keys = {
     { '<leader>oa', function() require('opencode').ask('@this: ', { submit = true }) end, mode = { 'n', 'x' }, desc = 'Opencode: ask about this' },
     { '<leader>oA', function() require('opencode').ask() end,                              mode = { 'n', 'x' }, desc = 'Opencode: ask (blank prompt)' },
     { '<leader>op', function() require('opencode').select() end,                           mode = { 'n', 'x' }, desc = 'Opencode: pick built-in prompt' },
     { '<leader>ot', function() require('opencode').toggle() end,                                                desc = 'Opencode: toggle window' },
     { '<leader>od', function() require('opencode').ask('Fix @diagnostics', { submit = true }) end,              desc = 'Opencode: fix diagnostics' },
-  },
-  opts = {
-    server = {
-      start = function()
-        if not ollama_running() then
-          vim.notify(
-            'ollama daemon is not running (127.0.0.1:11434 unreachable).\n'
-              .. 'Start it: sudo systemctl start ollama   (or: ollama serve)',
-            vim.log.levels.WARN,
-            { title = 'opencode' }
-          )
-          return
-        end
-        local model, err = pick_ollama_model()
-        if not model then
-          vim.notify('opencode: ' .. err, vim.log.levels.WARN, { title = 'opencode' })
-          return
-        end
-        require('opencode.terminal').open(
-          'opencode --port --model ' .. model,
-          {
-            split = 'right',
-            width = math.floor(vim.o.columns * 0.4),
-          }
-        )
-      end,
-    },
   },
 }

@@ -63,11 +63,13 @@ return {
             vim.notify('opencode: ' .. err, vim.log.levels.WARN, { title = 'opencode' })
             return
           end
+          local stack = require('util.ai_stack')
+          stack.hide_others('opencode')
           require('opencode.terminal').open(
             'opencode --port --model ' .. model,
             {
               split = 'right',
-              width = math.floor(vim.o.columns * 0.4),
+              width = stack.width(),
             }
           )
         end,
@@ -78,7 +80,7 @@ return {
     { '<leader>oa', function() require('opencode').ask('@this: ', { submit = true }) end, mode = { 'n', 'x' }, desc = 'Opencode: ask about this' },
     { '<leader>oA', function() require('opencode').ask() end,                              mode = { 'n', 'x' }, desc = 'Opencode: ask (blank prompt)' },
     { '<leader>op', function() require('opencode').select() end,                           mode = { 'n', 'x' }, desc = 'Opencode: pick built-in prompt' },
-    { '<leader>ot', function() require('opencode').toggle() end,                                                desc = 'Opencode: toggle window' },
+    { '<leader>ot', function() require('util.ai_stack').hide_others('opencode'); require('opencode').toggle() end, desc = 'Opencode: toggle window' },
     { '<leader>od', function() require('opencode').ask('Fix @diagnostics', { submit = true }) end,              desc = 'Opencode: fix diagnostics' },
   },
 }

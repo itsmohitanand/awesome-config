@@ -25,7 +25,11 @@ return {
             command = { 'zsh' },
           },
         },
-        repl_open_cmd = view.split.vertical.botright("40%"),
+        repl_open_cmd = function(bufnr)
+          local stack = require('util.ai_stack')
+          stack.hide_others('iron')
+          return view.split.vertical.botright(stack.width())(bufnr)
+        end,
       },
       keymaps = {},
       highlight = {

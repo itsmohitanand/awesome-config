@@ -3,7 +3,7 @@
 -- -----------------------------------------------------------------------------
 
 -- Theme — change this string to switch colorscheme; run switch-theme to sync all apps
-local theme = 'poimandres'
+local theme = 'everblush'
 
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '

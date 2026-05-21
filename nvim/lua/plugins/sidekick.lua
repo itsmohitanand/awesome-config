@@ -18,6 +18,8 @@ return {
         backend = 'zellij',
       },
       win = {
+        layout = 'right',
+        split = { width = 0.4, height = 0 },
         keys = {
           ['<c-q>'] = false,  -- disable (zellij reserved)
           ['<c-p>'] = false,  -- disable (zellij reserved)

@@ -33,7 +33,7 @@ end
 
 local group = vim.api.nvim_create_augroup('autosave', { clear = true })
 
-vim.api.nvim_create_autocmd({ 'BufLeave', 'WinLeave', 'FocusLost' }, {
+vim.api.nvim_create_autocmd({ 'BufLeave', 'WinLeave', 'FocusLost', 'InsertLeave' }, {
   group = group,
   callback = function(args) save(args.buf) end,
 })

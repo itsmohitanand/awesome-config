@@ -26,6 +26,8 @@ vim.api.nvim_create_autocmd('TermOpen', {
       vim.b[ev.buf].ai_kind = 'opencode'
     elseif name:match('ipython') then
       vim.b[ev.buf].ai_kind = 'iron'
+    elseif vim.bo[ev.buf].filetype == 'sidekick_terminal' or vim.b[ev.buf].sidekick_cli then
+      vim.b[ev.buf].ai_kind = 'sidekick'
     end
     if vim.b[ev.buf].ai_kind then
       set_winbar_on_buf_windows(ev.buf)

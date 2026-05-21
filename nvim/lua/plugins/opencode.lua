@@ -77,10 +77,13 @@ return {
     }
   end,
   keys = {
-    { '<leader>oa', function() require('opencode').ask('@this: ', { submit = true }) end, mode = { 'n', 'x' }, desc = 'Opencode: ask about this' },
-    { '<leader>oA', function() require('opencode').ask() end,                              mode = { 'n', 'x' }, desc = 'Opencode: ask (blank prompt)' },
-    { '<leader>op', function() require('opencode').select() end,                           mode = { 'n', 'x' }, desc = 'Opencode: pick built-in prompt' },
-    { '<leader>ot', function() require('util.ai_stack').hide_others('opencode'); require('opencode').toggle() end, desc = 'Opencode: toggle window' },
-    { '<leader>od', function() require('opencode').ask('Fix @diagnostics', { submit = true }) end,              desc = 'Opencode: fix diagnostics' },
+    -- @this/@buffer/@diagnostics inject *file location refs*, so opencode
+    -- reads from disk. Save the buffer first so the reference points at
+    -- current text, not the last-saved version.
+    { '<leader>oa', function() pcall(vim.cmd, 'silent! update'); require('opencode').ask('@this: ', { submit = true }) end, mode = { 'n', 'x' }, desc = 'Opencode: ask about this' },
+    { '<leader>oA', function() pcall(vim.cmd, 'silent! update'); require('opencode').ask() end,                              mode = { 'n', 'x' }, desc = 'Opencode: ask (blank prompt)' },
+    { '<leader>op', function() pcall(vim.cmd, 'silent! update'); require('opencode').select() end,                           mode = { 'n', 'x' }, desc = 'Opencode: pick built-in prompt' },
+    { '<leader>ot', function() require('util.ai_stack').hide_others('opencode'); require('opencode').toggle() end,           desc = 'Opencode: toggle window' },
+    { '<leader>od', function() pcall(vim.cmd, 'silent! update'); require('opencode').ask('Fix @diagnostics', { submit = true }) end, desc = 'Opencode: fix diagnostics' },
   },
 }

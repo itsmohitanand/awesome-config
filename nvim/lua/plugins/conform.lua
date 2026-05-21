@@ -9,6 +9,7 @@ return {
       python = { 'ruff_format', 'ruff_organize_imports' },
       lua    = { 'stylua' },
       tex    = { 'latexindent' },
+      json   = { 'jq' },
     },
     format_on_save = {
       timeout_ms = 2000,

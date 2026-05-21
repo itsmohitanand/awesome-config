@@ -2,7 +2,7 @@
 -- Bundled parsers: c, lua, vim, vimdoc, query, markdown, markdown_inline
 -- Extra parsers (site/parser/): python
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { '*' },
+  pattern = '*',
   callback = function()
     pcall(vim.treesitter.start)
   end,

@@ -151,21 +151,6 @@ Leader key: `Space`
 | `<leader>tky` | Yank notelink | telekasten.lua |
 | `[[` (insert) | Insert link | telekasten.lua |
 
-### Neorg (Structured Notes)
-
-| Key | Description | Source |
-| --- | --- | --- |
-| `<leader>nrw` | Switch workspace | neorg.lua |
-| `<leader>nrn` | Notes workspace | neorg.lua |
-| `<leader>nrp` | Personal workspace | neorg.lua |
-| `<leader>nrj` | Journal today | neorg.lua |
-| `<leader>nry` | Journal yesterday | neorg.lua |
-| `<leader>nrt` | Journal tomorrow | neorg.lua |
-| `<leader>nri` | Open index | neorg.lua |
-| `<leader>nrc` | Table of contents | neorg.lua |
-| `<leader>nrr` | Return to previous location | neorg.lua |
-| `<leader>o` | Neorg leader (built-in commands) | neorg.lua |
-
 ## Visual Mode
 
 | Key | Description | Source |

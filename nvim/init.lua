@@ -91,4 +91,16 @@ if theme == 'poimandres' then
   vim.api.nvim_set_hl(0, '@type',          { fg = '#89DDFF' })
   -- parameters / arguments  → blue-gray so they don't shout
   vim.api.nvim_set_hl(0, '@variable.parameter', { fg = '#767C9D' })
+elseif theme == 'everblush' then
+  -- everblush bolds most syntax; strip bold from common groups, leave titles/diagnostics alone
+  for _, g in ipairs({
+    'Keyword', 'Function', 'Type', 'Statement', 'Conditional', 'Repeat',
+    'Identifier', 'Operator', 'PreProc', 'Special',
+    '@keyword', '@function', '@function.call', '@type', '@type.builtin',
+    '@variable.builtin', '@constant.builtin',
+  }) do
+    local hl = vim.api.nvim_get_hl(0, { name = g })
+    hl.bold = false
+    vim.api.nvim_set_hl(0, g, hl)
+  end
 end

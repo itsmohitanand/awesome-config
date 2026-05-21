@@ -1,43 +1,70 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+# install.sh — symlink awesome-config into ~/.config and friends.
+# Idempotent: safe to run repeatedly. Detects parent-dir symlinks that would
+# otherwise cause self-loops (e.g. when ~/.config/nvim is already a whole-dir
+# symlink to this repo).
+#
+# This script never edits ~/.zshrc or ~/.bashrc. Source ~/.modern_shell_config
+# from your shell rc file yourself — see the message printed at the end.
+
+set -euo pipefail
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 
-mkdir -p ~/.config/kitty/themes ~/.config/zellij/layouts ~/.config/nvim
+link() {
+    local rel="$1" dest="$2"
+    local src="$DOTFILES/$rel"
+
+    if [[ ! -e "$src" && ! -L "$src" ]]; then
+        printf '  skip (missing in repo): %s\n' "$rel" >&2
+        return
+    fi
+
+    # If dest already resolves to src (already linked, or reached via a parent
+    # symlink), do nothing. Creating a symlink here would produce a self-loop.
+    local src_real dest_real
+    src_real="$(realpath "$src")"
+    dest_real="$(realpath -m "$dest")"
+    if [[ "$dest_real" == "$src_real" ]]; then
+        printf '  ok:   %s\n' "$dest"
+        return
+    fi
+
+    mkdir -p "$(dirname "$dest")"
+    ln -sfn "$src" "$dest"
+    printf '  link: %s -> %s\n' "$dest" "$src"
+}
+
+echo "Symlinking awesome-config from $DOTFILES"
 
 # Kitty
-ln -sf "$DOTFILES/kitty/kitty.conf"                   ~/.config/kitty/kitty.conf
-ln -sf "$DOTFILES/kitty/themes/poimandres.conf"       ~/.config/kitty/themes/poimandres.conf
-ln -sf "$DOTFILES/kitty/themes/cyberdream.conf"       ~/.config/kitty/themes/cyberdream.conf
-ln -sf "$DOTFILES/kitty/themes/everblush.conf"        ~/.config/kitty/themes/everblush.conf
+link kitty/kitty.conf                  "$HOME/.config/kitty/kitty.conf"
+link kitty/themes/poimandres.conf      "$HOME/.config/kitty/themes/poimandres.conf"
+link kitty/themes/cyberdream.conf      "$HOME/.config/kitty/themes/cyberdream.conf"
+link kitty/themes/everblush.conf       "$HOME/.config/kitty/themes/everblush.conf"
 
 # Zellij
-ln -sf "$DOTFILES/zellij/config.kdl"                  ~/.config/zellij/config.kdl
-ln -sf "$DOTFILES/zellij/layouts/python-dev.kdl"      ~/.config/zellij/layouts/python-dev.kdl
-ln -sf "$DOTFILES/zellij/layouts/phd.kdl"             ~/.config/zellij/layouts/phd.kdl
-ln -sf "$DOTFILES/zellij/layouts/latex-thesis.kdl"    ~/.config/zellij/layouts/latex-thesis.kdl
+link zellij/config.kdl                 "$HOME/.config/zellij/config.kdl"
+link zellij/layouts/python-dev.kdl     "$HOME/.config/zellij/layouts/python-dev.kdl"
+link zellij/layouts/phd.kdl            "$HOME/.config/zellij/layouts/phd.kdl"
+link zellij/layouts/latex-thesis.kdl   "$HOME/.config/zellij/layouts/latex-thesis.kdl"
 
 # Starship
-ln -sf "$DOTFILES/starship/starship.toml"             ~/.config/starship.toml
+link starship/starship.toml            "$HOME/.config/starship.toml"
 
 # Neovim
-ln -sf "$DOTFILES/nvim/init.lua"                      ~/.config/nvim/init.lua
-ln -sf "$DOTFILES/nvim/lua"                           ~/.config/nvim/lua
+link nvim/init.lua                     "$HOME/.config/nvim/init.lua"
+link nvim/lua                          "$HOME/.config/nvim/lua"
 
-# Zed
-mkdir -p ~/.config/zed
-ln -sf "$DOTFILES/zed/keymap.json"                    ~/.config/zed/keymap.json
-ln -sf "$DOTFILES/zed/settings.json"                  ~/.config/zed/settings.json
-
-# Shell config (source this from ~/.zshrc or ~/.bashrc)
-ln -sf "$DOTFILES/.modern_shell_config"               ~/.modern_shell_config
+# Modern shell config (source this from ~/.zshrc or ~/.bashrc yourself)
+link .modern_shell_config              "$HOME/.modern_shell_config"
 
 # Theme switcher
-ln -sf "$DOTFILES/switch-theme.sh"                    ~/.local/bin/switch-theme
+link switch-theme.sh                   "$HOME/.local/bin/switch-theme"
 chmod +x "$DOTFILES/switch-theme.sh"
 
-echo "Dotfiles installed."
-echo ""
-echo "Add to your ~/.zshrc or ~/.bashrc:"
-echo "  source ~/.modern_shell_config"
-echo ""
+echo
+echo "Done. This script did NOT touch ~/.zshrc or ~/.bashrc."
+echo "If you haven't already, add this line to your shell rc:"
+echo "    source ~/.modern_shell_config"
+echo
 echo "Switch themes with:  switch-theme poimandres | cyberdream | everblush"

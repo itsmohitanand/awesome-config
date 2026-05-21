@@ -283,7 +283,7 @@ simplified_ui false
 // Default: default
 //
 // To switch themes: switch-theme <name>  (poimandres | cyberdream | everblush)
-theme "poimandres"
+theme "everblush"
  
 // Choose the base input mode of zellij.
 // Default: normal
@@ -362,7 +362,7 @@ theme "poimandres"
 // that will be used by default if this option is not set.
 // Examples:
 //
-copy_command "xclip -selection clipboard" // x11
+// copy_command "xclip -selection clipboard" // x11
 // copy_command "wl-copy"                    // wayland
 // copy_command "pbcopy"                     // osx
 // 

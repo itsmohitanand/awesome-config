@@ -44,6 +44,9 @@ map('n', 'k', 'gk')
 map('n', '<C-d>', '<C-d>zz', { desc = 'Page down and center' })
 map('n', '<C-u>', '<C-u>zz', { desc = 'Page up and center' })
 
+-- Clear search highlight on Esc
+map('n', '<Esc>', ':nohlsearch<CR>', { desc = 'Clear search highlight' })
+
 -- Center screen on search results
 map('n', 'n', 'nzz', { desc = 'Search next and center' })
 map('n', 'N', 'Nzz', { desc = 'Search previous and center' })
@@ -125,6 +128,23 @@ vim.keymap.set('n', '<leader>fr', ":let @+ = expand('%:.') | let @\" = @+<CR>", 
 
 -- Copy filename only to clipboard
 vim.keymap.set('n', '<leader>fn', ":let @+ = expand('%:t') | let @\" = @+<CR>", { desc = 'Copy current file name' })
+
+---------------------
+-- SCRATCH
+---------------------
+local scratch_dir = '/data/scratch'
+
+map('n', '<leader>xn', function()
+  vim.fn.mkdir(scratch_dir, 'p')
+  local fname = scratch_dir .. '/' .. os.date('%Y-%m-%d_%H%M%S') .. '.py'
+  vim.fn.writefile({}, fname)
+  vim.cmd('edit ' .. fname)
+end, { desc = 'New scratch file' })
+
+map('n', '<leader>xo', function()
+  vim.fn.mkdir(scratch_dir, 'p')
+  Snacks.picker.files({ cwd = scratch_dir, hidden = true })
+end, { desc = 'Open scratch folder' })
 
 ---------------------
 -- LSP MAPPINGS (Insert Mode)

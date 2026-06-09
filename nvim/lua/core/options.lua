@@ -21,6 +21,13 @@ vim.opt.incsearch = true   -- Show matches while typing
 vim.opt.ignorecase = true  -- Ignore case in search patterns
 vim.opt.smartcase = true   -- Override ignorecase if search pattern contains uppercase letters
 
+-- Keep PYTHONPATH in sync with cwd so iron (ipython) and DAP can import project code
+local function sync_pythonpath()
+  vim.env.PYTHONPATH = vim.fn.getcwd()
+end
+sync_pythonpath()
+vim.api.nvim_create_autocmd('DirChanged', { callback = sync_pythonpath })
+
 -- Use ripgrep for :grep
 vim.opt.grepprg = 'rg --vimgrep --smart-case --hidden --glob=!.git/'
 vim.opt.grepformat = '%f:%l:%c:%m'

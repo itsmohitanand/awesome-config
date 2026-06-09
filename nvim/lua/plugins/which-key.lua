@@ -11,7 +11,7 @@ return {
       { '<leader>d',  group = 'Debug' },
       { '<leader>f',  group = 'Find / Files' },
       { '<leader>g',  group = 'Git' },
-      { '<leader>h',  group = 'Harpoon' },
+      { '<leader>h',  group = 'Haunt' },
       { '<leader>r',  group = 'REPL' },
       { '<leader>sk', group = 'Sidekick' },
     },

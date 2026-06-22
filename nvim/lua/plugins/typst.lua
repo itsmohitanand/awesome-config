@@ -8,10 +8,11 @@ return {
       require('typst-preview').update()
     end,
     opts = {
-      dependencies_bin = { ['tinymist'] = 'tinymist' },
+      dependencies_bin = { ['tinymist'] = vim.fn.stdpath('data') .. '/mason/bin/tinymist' },
       open_cmd = nil, -- nil → opens in default browser; set e.g. 'firefox %s' to override
       invert_colors = 'auto', -- invert in dark mode
       follow_cursor = true,
+      port = 3000,
     },
     keys = {
       { '<leader>tp', '<cmd>TypstPreview<cr>',       desc = 'Typst: start browser preview' },

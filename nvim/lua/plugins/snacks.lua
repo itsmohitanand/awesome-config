@@ -35,7 +35,7 @@ return {
     notifier  = { enabled = true, timeout = 3000 },
     indent    = { enabled = false },
     scope     = { enabled = false },
-    bigfile   = { enabled = true },
+    bigfile   = { enabled = true, size = 5 * 1024 * 1024, line_length = 1000000 }, -- 5MB, allow minified files
     terminal  = {
       enabled = true,
       win = {

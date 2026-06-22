@@ -5,6 +5,24 @@ return {
     local view = require('iron.view')
     local common = require('iron.fts.common')
 
+    local function julia_bin()
+      local julia = vim.fn.exepath('julia')
+      if julia ~= '' then
+        return julia
+      end
+
+      local juliaup = vim.fs.joinpath(vim.env.HOME or '', '.juliaup', 'bin', 'julia')
+      if vim.uv.fs_stat(juliaup) then
+        return juliaup
+      end
+
+      error('julia not found: expected `julia` on PATH or ~/.juliaup/bin/julia')
+    end
+
+    local function julia_project_dir()
+      return vim.fn.getcwd()
+    end
+
     iron.setup({
       config = {
         scratch_repl = true,
@@ -19,6 +37,20 @@ return {
               return { ipython, '--no-autoindent' }
             end,
             format = common.bracketed_paste_python,
+            block_dividers = { '# %%', '#%%' },
+          },
+          julia = {
+            command = function()
+              local project = julia_project_dir()
+              return {
+                julia_bin(),
+                '--color=yes',
+                '--project=' .. project,
+                '-i',
+                '-e',
+                string.format('using Pkg; Pkg.activate(%q)', project),
+              }
+            end,
             block_dividers = { '# %%', '#%%' },
           },
           sh = {
@@ -39,7 +71,7 @@ return {
     })
 
     -- Iron keymaps, set globally but guarded to avoid errors in non-REPL filetypes
-    local iron_fts = { python = true, sh = true, bash = true }
+    local iron_fts = { python = true, julia = true, sh = true, bash = true }
     local function iron_action(modes, lhs, action, desc)
       vim.keymap.set(modes, lhs, function()
         if iron_fts[vim.bo.filetype] then
@@ -77,7 +109,7 @@ return {
     vim.api.nvim_create_autocmd('TermOpen', {
       callback = function(ev)
         local name = vim.api.nvim_buf_get_name(ev.buf)
-        if name:match('ipython') then
+        if name:match('ipython') or name:match('julia') then
           vim.keymap.set('t', '<C-space>', '<C-\\><C-n><C-w>w', { buffer = ev.buf, desc = 'Escape REPL and focus code' })
         end
       end,

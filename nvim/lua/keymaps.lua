@@ -98,6 +98,8 @@ vim.keymap.set('v', '<C-_>', 'gc', { remap = true, silent = true, desc = 'Toggle
 ---------------------
 map('n', ']d', vim.diagnostic.goto_next, { desc = 'Next Diagnostic' })
 map('n', '[d', vim.diagnostic.goto_prev, { desc = 'Prev Diagnostic' })
+map('n', 'td', '<cmd>Trouble diagnostics toggle<cr>', { desc = 'Toggle Trouble diagnostics' })
+map('n', 'te', '<cmd>Trouble diagnostics_errors toggle<cr>', { desc = 'Toggle Trouble errors' })
 map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Floating Diagnostic' })
 map('n', '<leader>cx', function()
   local enabled = vim.diagnostic.is_enabled()

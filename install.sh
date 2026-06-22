@@ -55,6 +55,9 @@ link starship/starship.toml            "$HOME/.config/starship.toml"
 link nvim/init.lua                     "$HOME/.config/nvim/init.lua"
 link nvim/lua                          "$HOME/.config/nvim/lua"
 
+# Wave terminal
+link wave/settings.json                "$HOME/snap/waveterm/current/.config/waveterm/settings.json"
+
 # Modern shell config (source this from ~/.zshrc or ~/.bashrc yourself)
 link .modern_shell_config              "$HOME/.modern_shell_config"
 

@@ -1,11 +1,13 @@
--- Quick-notes workflow rooted at ~/Documents/notes/.
--- Layout (seed structure; an agent reorganizes periodically):
---   daily/YYYY-MM-DD.md   <- today's journal
---   topics/<slug>.md      <- durable single-subject notes
---   inbox/                <- (agent-managed) unsorted capture
+-- Quick-notes workflow rooted at ~/Documents/notes/, mirroring Quanta's layout
+-- (github.com/itsmohitanand/notes + the Quanta app's journal.py):
+--   inbox/dump.md         <- single freeform capture file, any heading, dump anything
+--   daily/YYYY-MM-DD.md   <- today's journal, one file per day
+--   <folder>/<slug>.md    <- durable named-folder notes (folder = category)
+-- "topics" is being reworked into AI-generated "reflection" output (TODO, deferred).
 -- Keys:
---   <leader>nn  open today's daily note
---   <leader>nN  prompt for title, open topical note
+--   <leader>nn  open the dump file (jumps to end, ready to append)
+--   <leader>nd  open today's daily journal
+--   <leader>nN  prompt for "folder/title", open note there
 -- Auto-commits any save into ~/Documents/notes/ git repo (no auto-push).
 
 local NOTES_DIR = vim.fn.expand('~/Documents/notes')
@@ -19,24 +21,35 @@ local function open_note(path)
   vim.cmd.edit(vim.fn.fnameescape(path))
 end
 
+local function dump_note()
+  open_note(NOTES_DIR .. '/inbox/dump.md')
+  vim.cmd('normal! G')
+end
+
 local function daily_note()
   open_note(NOTES_DIR .. '/daily/' .. os.date('%Y-%m-%d') .. '.md')
 end
 
-local function topic_note()
-  vim.ui.input({ prompt = 'Note title: ' }, function(title)
-    if not title or title == '' then return end
+local function folder_note()
+  vim.ui.input({ prompt = 'folder/title (e.g. work/roadmap): ' }, function(input)
+    if not input or input == '' then return end
+    local folder, title = input:match('^(.-)/(.+)$')
+    if not folder or folder == '' then
+      vim.notify("note: expected 'folder/title'", vim.log.levels.WARN)
+      return
+    end
     local slug = slugify(title)
     if slug == '' then
       vim.notify('note: empty slug', vim.log.levels.WARN)
       return
     end
-    open_note(NOTES_DIR .. '/topics/' .. slug .. '.md')
+    open_note(NOTES_DIR .. '/' .. slugify(folder) .. '/' .. slug .. '.md')
   end)
 end
 
-vim.keymap.set('n', '<leader>nn', daily_note, { desc = 'Notes: today' })
-vim.keymap.set('n', '<leader>nN', topic_note, { desc = 'Notes: new topic' })
+vim.keymap.set('n', '<leader>nn', dump_note, { desc = 'Notes: dump' })
+vim.keymap.set('n', '<leader>nd', daily_note, { desc = 'Notes: today' })
+vim.keymap.set('n', '<leader>nN', folder_note, { desc = 'Notes: new folder note' })
 
 -- Autosave .md notes every 30 s; timer lives for the lifetime of the buffer.
 local autosave_timers = {}
@@ -86,19 +99,26 @@ vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
   callback = function(args) stop_autosave(args.buf) end,
 })
 
--- Auto-commit all notes changes once, just before Neovim exits.
+-- Auto-commit + push all notes changes once, just before Neovim exits.
+-- `timeout 10` caps the push so a dead/offline connection can't hang the quit.
 vim.api.nvim_create_autocmd('VimLeavePre', {
   group = vim.api.nvim_create_augroup('notes_autocommit', { clear = true }),
   callback = function()
     local msg = string.format('notes: autosave @ %s', os.date('%Y-%m-%d %H:%M'))
     -- Synchronous: we must finish before the process exits.
     local add = vim.system({ 'git', '-C', NOTES_DIR, 'add', '-A' }, { text = true }):wait()
-    if add.code ~= 0 then return end
+    if add.code == 0 then
+      vim.system(
+        { 'git', '-C', NOTES_DIR, 'commit', '--quiet', '-m', msg },
+        { text = true }
+      ):wait()
+      -- exit 1 means nothing staged — that's fine, ignore silently.
+    end
     vim.system(
-      { 'git', '-C', NOTES_DIR, 'commit', '--quiet', '-m', msg },
+      { 'timeout', '10', 'git', '-C', NOTES_DIR, 'push', '--quiet', 'origin', 'main' },
       { text = true }
     ):wait()
-    -- exit 1 means nothing staged — that's fine, ignore silently.
+    -- push failures (offline, conflicts) are silent here; next close retries.
   end,
 })
 

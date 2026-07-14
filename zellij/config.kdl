@@ -243,6 +243,362 @@ keybinds clear-defaults=true {
         bind "z" { ToggleFocusFullscreen; SwitchToMode "normal"; }
     }
 }
+themes {
+    cyberdream {
+        text_unselected {
+            base 255 255 255
+            background 22 24 26
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 94 255 108
+            emphasis_3 189 94 255
+        }
+        text_selected {
+            base 255 255 255
+            background 22 24 26
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 94 255 108
+            emphasis_3 189 94 255
+        }
+        ribbon_selected {
+            base 22 24 26
+            background 94 255 108
+            emphasis_0 255 110 94
+            emphasis_1 255 189 94
+            emphasis_2 189 94 255
+            emphasis_3 94 161 255
+        }
+        ribbon_unselected {
+            base 22 24 26
+            background 255 255 255
+            emphasis_0 255 110 94
+            emphasis_1 255 255 255
+            emphasis_2 94 161 255
+            emphasis_3 189 94 255
+        }
+        table_title {
+            base 94 255 108
+            background 0
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 94 255 108
+            emphasis_3 189 94 255
+        }
+        table_cell_selected {
+            base 255 255 255
+            background 22 24 26
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 94 255 108
+            emphasis_3 189 94 255
+        }
+        table_cell_unselected {
+            base 255 255 255
+            background 22 24 26
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 94 255 108
+            emphasis_3 189 94 255
+        }
+        list_selected {
+            base 255 255 255
+            background 22 24 26
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 94 255 108
+            emphasis_3 189 94 255
+        }
+        list_unselected {
+            base 255 255 255
+            background 22 24 26
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 94 255 108
+            emphasis_3 189 94 255
+        }
+        frame_selected {
+            base 94 255 108
+            background 0
+            emphasis_0 255 189 94
+            emphasis_1 94 241 255
+            emphasis_2 189 94 255
+            emphasis_3 0
+        }
+        frame_highlight {
+            base 255 189 94
+            background 0
+            emphasis_0 189 94 255
+            emphasis_1 0
+            emphasis_2 255 189 94
+            emphasis_3 255 189 94
+        }
+        exit_code_success {
+            base 94 255 108
+            background 0
+            emphasis_0 94 241 255
+            emphasis_1 22 24 26
+            emphasis_2 189 94 255
+            emphasis_3 94 161 255
+        }
+        exit_code_error {
+            base 255 110 94
+            background 0
+            emphasis_0 241 255 94
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 189 94 255
+            player_2 94 161 255
+            player_3 0
+            player_4 241 255 94
+            player_5 94 241 255
+            player_6 0
+            player_7 255 110 94
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+    everblush {
+        text_unselected {
+            base 179 185 184
+            background 35 42 45
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 140 207 126
+            emphasis_3 196 127 213
+        }
+        text_selected {
+            base 179 185 184
+            background 20 27 30
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 140 207 126
+            emphasis_3 196 127 213
+        }
+        ribbon_selected {
+            base 35 42 45
+            background 140 207 126
+            emphasis_0 229 116 116
+            emphasis_1 229 199 107
+            emphasis_2 196 127 213
+            emphasis_3 103 176 232
+        }
+        ribbon_unselected {
+            base 35 42 45
+            background 218 218 218
+            emphasis_0 229 116 116
+            emphasis_1 179 185 184
+            emphasis_2 103 176 232
+            emphasis_3 196 127 213
+        }
+        table_title {
+            base 140 207 126
+            background 0
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 140 207 126
+            emphasis_3 196 127 213
+        }
+        table_cell_selected {
+            base 179 185 184
+            background 20 27 30
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 140 207 126
+            emphasis_3 196 127 213
+        }
+        table_cell_unselected {
+            base 179 185 184
+            background 35 42 45
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 140 207 126
+            emphasis_3 196 127 213
+        }
+        list_selected {
+            base 179 185 184
+            background 20 27 30
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 140 207 126
+            emphasis_3 196 127 213
+        }
+        list_unselected {
+            base 179 185 184
+            background 35 42 45
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 140 207 126
+            emphasis_3 196 127 213
+        }
+        frame_selected {
+            base 140 207 126
+            background 0
+            emphasis_0 229 199 107
+            emphasis_1 108 191 191
+            emphasis_2 196 127 213
+            emphasis_3 0
+        }
+        frame_highlight {
+            base 229 199 107
+            background 0
+            emphasis_0 196 127 213
+            emphasis_1 0
+            emphasis_2 229 199 107
+            emphasis_3 229 199 107
+        }
+        exit_code_success {
+            base 140 207 126
+            background 0
+            emphasis_0 108 191 191
+            emphasis_1 35 42 45
+            emphasis_2 196 127 213
+            emphasis_3 103 176 232
+        }
+        exit_code_error {
+            base 229 116 116
+            background 0
+            emphasis_0 229 199 107
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 196 127 213
+            player_2 103 176 232
+            player_3 0
+            player_4 229 199 107
+            player_5 108 191 191
+            player_6 0
+            player_7 229 116 116
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+    poimandres {
+        text_unselected {
+            base 228 240 251
+            background 23 25 34
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 93 228 199
+            emphasis_3 208 103 157
+        }
+        text_selected {
+            base 228 240 251
+            background 27 30 40
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 93 228 199
+            emphasis_3 208 103 157
+        }
+        ribbon_selected {
+            base 23 25 34
+            background 93 228 199
+            emphasis_0 208 103 157
+            emphasis_1 95 179 161
+            emphasis_2 208 103 157
+            emphasis_3 173 215 255
+        }
+        ribbon_unselected {
+            base 23 25 34
+            background 166 172 205
+            emphasis_0 208 103 157
+            emphasis_1 228 240 251
+            emphasis_2 173 215 255
+            emphasis_3 208 103 157
+        }
+        table_title {
+            base 93 228 199
+            background 0
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 93 228 199
+            emphasis_3 208 103 157
+        }
+        table_cell_selected {
+            base 228 240 251
+            background 27 30 40
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 93 228 199
+            emphasis_3 208 103 157
+        }
+        table_cell_unselected {
+            base 228 240 251
+            background 23 25 34
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 93 228 199
+            emphasis_3 208 103 157
+        }
+        list_selected {
+            base 228 240 251
+            background 27 30 40
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 93 228 199
+            emphasis_3 208 103 157
+        }
+        list_unselected {
+            base 228 240 251
+            background 23 25 34
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 93 228 199
+            emphasis_3 208 103 157
+        }
+        frame_selected {
+            base 93 228 199
+            background 0
+            emphasis_0 95 179 161
+            emphasis_1 137 221 255
+            emphasis_2 208 103 157
+            emphasis_3 0
+        }
+        frame_highlight {
+            base 95 179 161
+            background 0
+            emphasis_0 208 103 157
+            emphasis_1 0
+            emphasis_2 95 179 161
+            emphasis_3 95 179 161
+        }
+        exit_code_success {
+            base 93 228 199
+            background 0
+            emphasis_0 137 221 255
+            emphasis_1 23 25 34
+            emphasis_2 208 103 157
+            emphasis_3 173 215 255
+        }
+        exit_code_error {
+            base 208 103 157
+            background 0
+            emphasis_0 255 250 194
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 208 103 157
+            player_2 173 215 255
+            player_3 0
+            player_4 255 250 194
+            player_5 137 221 255
+            player_6 0
+            player_7 208 103 157
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+}
 
 // Plugin aliases - can be used to change the implementation of Zellij
 // changing these requires a restart to take effect
@@ -276,14 +632,30 @@ web_client {
 // Options:
 //   - true
 //   - false (Default)
-//
+// 
 simplified_ui false
+ 
+// Enable OSC8 hyperlink output
+// Options:
+//   - true (Default)
+//   - false
+// 
+// osc8_hyperlinks true
  
 // Choose the theme that is specified in the themes section.
 // Default: default
-//
-// To switch themes: switch-theme <name>  (poimandres | cyberdream | everblush)
+// 
 theme "everblush"
+ 
+// Theme to use when the host terminal reports a dark color palette.
+// Requires `theme_light` to also be set; otherwise `theme` is used.
+// 
+// theme_dark "dracula"
+ 
+// Theme to use when the host terminal reports a light color palette.
+// Requires `theme_dark` to also be set; otherwise `theme` is used.
+// 
+// theme_light "solarized-light"
  
 // Choose the base input mode of zellij.
 // Default: normal
@@ -504,7 +876,7 @@ support_kitty_keyboard_protocol true
 // Whether to show tips on startup
 // Default: true
 // 
-// show_startup_tips false
+show_startup_tips false
  
 // Whether to show release notes on first version run
 // Default: true
@@ -514,6 +886,22 @@ support_kitty_keyboard_protocol true
 // Whether to enable mouse hover effects and pane grouping functionality
 // default is true
 // advanced_mouse_actions false
+ 
+// Whether to enable mouse hover visual effects (frame highlight and help text)
+// default is true
+// mouse_hover_effects false
+ 
+// Whether to show visual bell indicators (pane/tab frame flash and [!] suffix)
+// default is true
+// visual_bell true
+ 
+// Whether to focus panes on mouse hover
+// default is false
+// focus_follows_mouse false
+ 
+// Whether clicking a pane to focus it also sends the click into the pane
+// default is false
+// mouse_click_through false
  
 // The ip address the web server should listen on when it starts
 // Default: "127.0.0.1"
@@ -532,47 +920,9 @@ support_kitty_keyboard_protocol true
 // Note: be sure to escape backslashes and similar characters properly
 // post_command_discovery_hook "echo $RESURRECT_COMMAND | sed <your_regex_here>"
 
-// ============================================================================
-// Themes
-// ============================================================================
-themes {
-    poimandres {
-        fg      "#A6ACCD"
-        bg      "#1B1E28"
-        black   "#171922"
-        red     "#D0679D"
-        green   "#5DE4C7"
-        yellow  "#FFFAC2"
-        blue    "#ADD7FF"
-        magenta "#D0679D"
-        cyan    "#89DDFF"
-        white   "#E4F0FB"
-        orange  "#5FB3A1"
-    }
-    cyberdream {
-        fg      "#ffffff"
-        bg      "#16181a"
-        black   "#16181a"
-        red     "#ff6e5e"
-        green   "#5eff6c"
-        yellow  "#f1ff5e"
-        blue    "#5ea1ff"
-        magenta "#bd5eff"
-        cyan    "#5ef1ff"
-        white   "#ffffff"
-        orange  "#ffbd5e"
-    }
-    everblush {
-        fg      "#dadada"
-        bg      "#141b1e"
-        black   "#232a2d"
-        red     "#e57474"
-        green   "#8ccf7e"
-        yellow  "#e5c76b"
-        blue    "#67b0e8"
-        magenta "#c47fd5"
-        cyan    "#6cbfbf"
-        white   "#b3b9b8"
-        orange  "#e5c76b"
-    }
-}
+// Number of async worker tasks to spawn per active client.
+//
+// Allocating few tasks may result in resource contention and lags. Small values (around 4) should
+// typically work best. Set to 0 to use the number of (physical) CPU cores.
+// Note: This only applies to web clients at the moment.
+// client_async_worker_tasks 4

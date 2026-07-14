@@ -1,8 +1,8 @@
 -- Quick-notes workflow rooted at ~/Documents/notes/.
 -- Layout (seed structure; an agent reorganizes periodically):
---   daily/YYYY-MM-DD.typ   <- today's journal
---   topics/<slug>.typ      <- durable single-subject notes
---   inbox/                 <- (agent-managed) unsorted capture
+--   daily/YYYY-MM-DD.md   <- today's journal
+--   topics/<slug>.md      <- durable single-subject notes
+--   inbox/                <- (agent-managed) unsorted capture
 -- Keys:
 --   <leader>nn  open today's daily note
 --   <leader>nN  prompt for title, open topical note
@@ -20,7 +20,7 @@ local function open_note(path)
 end
 
 local function daily_note()
-  open_note(NOTES_DIR .. '/daily/' .. os.date('%Y-%m-%d') .. '.typ')
+  open_note(NOTES_DIR .. '/daily/' .. os.date('%Y-%m-%d') .. '.md')
 end
 
 local function topic_note()
@@ -31,19 +31,19 @@ local function topic_note()
       vim.notify('note: empty slug', vim.log.levels.WARN)
       return
     end
-    open_note(NOTES_DIR .. '/topics/' .. slug .. '.typ')
+    open_note(NOTES_DIR .. '/topics/' .. slug .. '.md')
   end)
 end
 
 vim.keymap.set('n', '<leader>nn', daily_note, { desc = 'Notes: today' })
 vim.keymap.set('n', '<leader>nN', topic_note, { desc = 'Notes: new topic' })
 
--- Autosave .typ notes every 30 s; timer lives for the lifetime of the buffer.
+-- Autosave .md notes every 30 s; timer lives for the lifetime of the buffer.
 local autosave_timers = {}
 
-local function is_notes_typ(bufnr)
+local function is_notes_md(bufnr)
   local file = vim.api.nvim_buf_get_name(bufnr)
-  return file:find('^' .. NOTES_DIR .. '/') and file:match('%.typ$')
+  return file:find('^' .. NOTES_DIR .. '/') and file:match('%.md$')
 end
 
 local function stop_autosave(bufnr)
@@ -73,15 +73,15 @@ end
 local as_group = vim.api.nvim_create_augroup('notes_autosave', { clear = true })
 
 vim.api.nvim_create_autocmd({ 'BufReadPost', 'BufNewFile' }, {
-  pattern = '*.typ',
+  pattern = '*.md',
   group = as_group,
   callback = function(args)
-    if is_notes_typ(args.buf) then start_autosave(args.buf) end
+    if is_notes_md(args.buf) then start_autosave(args.buf) end
   end,
 })
 
 vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
-  pattern = '*.typ',
+  pattern = '*.md',
   group = as_group,
   callback = function(args) stop_autosave(args.buf) end,
 })

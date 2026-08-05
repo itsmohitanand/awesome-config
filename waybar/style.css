@@ -1,0 +1,157 @@
+/* waybar — opaque, typographic. No blur (niri doesn't do layer-shell blur), so
+ * the design leans on spacing, weight, and a single accent instead.
+ * Palette comes from theme.css, which switch-theme repoints per theme. */
+@import url("theme.css");
+
+* {
+  font-family: "Inter", "Inter Display", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+}
+
+window#waybar {
+  background: @bg;
+  color: @fg;
+  border-bottom: 1px solid @surface;
+}
+
+/* Uniform breathing room for every module. */
+#workspaces,
+#window,
+#clock,
+#cpu,
+#memory,
+#battery,
+#network,
+#pulseaudio,
+#tray,
+#custom-notifications {
+  padding: 0 12px;
+}
+
+/* ── Workspaces ───────────────────────────────────────────────── */
+
+#workspaces {
+  padding: 0 8px;
+}
+
+#workspaces button {
+  padding: 0 6px;
+  color: @fg_dim;
+  background: transparent;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+#workspaces button:hover {
+  color: @fg;
+  background: transparent;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+#workspaces button.active {
+  color: @accent;
+}
+
+#workspaces button.urgent {
+  color: @crit;
+}
+
+/* ── Window title ─────────────────────────────────────────────── */
+
+#window {
+  color: @fg_dim;
+  font-weight: 400;
+}
+
+window#waybar.empty #window {
+  padding: 0;
+}
+
+/* ── Clock: the one centred, high-contrast element ────────────── */
+
+#clock {
+  color: @fg;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Right cluster ────────────────────────────────────────────── */
+
+#cpu,
+#memory,
+#network,
+#pulseaudio {
+  color: @fg_dim;
+}
+
+#cpu:hover,
+#memory:hover,
+#network:hover,
+#pulseaudio:hover {
+  color: @fg;
+}
+
+#pulseaudio.muted {
+  color: @surface;
+}
+
+#network.disconnected {
+  color: @crit;
+}
+
+#battery {
+  color: @fg_dim;
+}
+
+#battery.charging,
+#battery.plugged {
+  color: @good;
+}
+
+#battery.warning:not(.charging) {
+  color: @warn;
+}
+
+#battery.critical:not(.charging) {
+  color: @crit;
+}
+
+#custom-notifications {
+  color: @fg_dim;
+  padding-right: 14px;
+}
+
+#custom-notifications.notification,
+#custom-notifications.dnd-notification {
+  color: @accent;
+}
+
+#tray menu {
+  background: @bg_alt;
+  color: @fg;
+}
+
+#tray > .passive {
+  -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
+}
+
+tooltip {
+  background: @bg_alt;
+  border: 1px solid @surface;
+  border-radius: 8px;
+}
+
+tooltip label {
+  color: @fg;
+  padding: 6px;
+}

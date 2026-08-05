@@ -1,0 +1,206 @@
+/* swaync — notification popups + control center.
+ * Same opaque/typographic language as waybar. Palette from theme.css, which
+ * switch-theme repoints per theme. */
+@import url("theme.css");
+
+* {
+  font-family: "Inter", "Inter Display", sans-serif;
+  font-size: 13px;
+}
+
+/* ── Floating popups ──────────────────────────────────────────── */
+
+.notification-row {
+  outline: none;
+}
+
+.notification-row:focus .notification,
+.notification-row:hover .notification {
+  background: @surface;
+}
+
+.notification {
+  background: @bg_alt;
+  border: 1px solid @surface;
+  border-radius: 12px;
+  margin: 6px 10px;
+  padding: 0;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  transition: background 150ms ease;
+}
+
+.notification-content {
+  padding: 12px;
+  background: transparent;
+}
+
+.summary {
+  color: @fg;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.time {
+  color: @fg_dim;
+  font-size: 11px;
+}
+
+.body {
+  color: @fg_dim;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.notification.critical {
+  border-color: @crit;
+}
+
+.close-button {
+  background: transparent;
+  color: @fg_dim;
+  border-radius: 8px;
+  margin: 6px;
+  padding: 2px;
+}
+
+.close-button:hover {
+  background: @crit;
+  color: @bg;
+}
+
+.notification-action {
+  background: @surface;
+  color: @fg;
+  border: none;
+  border-radius: 8px;
+  margin: 4px;
+  padding: 6px;
+}
+
+.notification-action:hover {
+  background: @accent;
+  color: @bg;
+}
+
+.inline-reply-entry {
+  background: @bg;
+  color: @fg;
+  border: 1px solid @surface;
+  border-radius: 8px;
+}
+
+/* ── Control center ───────────────────────────────────────────── */
+
+.control-center {
+  background: @bg;
+  border: 1px solid @surface;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+  padding: 10px;
+}
+
+.control-center .notification {
+  margin: 5px 0;
+}
+
+.control-center-list {
+  background: transparent;
+}
+
+.widget-title {
+  color: @fg;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 6px 8px 10px 8px;
+}
+
+.widget-title > button {
+  background: @surface;
+  color: @fg;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+}
+
+.widget-title > button:hover {
+  background: @accent;
+  color: @bg;
+}
+
+.widget-dnd {
+  color: @fg;
+  padding: 6px 8px;
+  font-weight: 500;
+}
+
+.widget-dnd > switch {
+  background: @surface;
+  border: none;
+  border-radius: 12px;
+}
+
+.widget-dnd > switch:checked {
+  background: @accent;
+}
+
+.widget-dnd > switch slider {
+  background: @fg;
+  border-radius: 12px;
+}
+
+.widget-dnd > switch:checked slider {
+  background: @bg;
+}
+
+.widget-mpris {
+  background: @bg_alt;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 6px 0;
+}
+
+.widget-mpris-title {
+  color: @fg;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.widget-mpris-subtitle {
+  color: @fg_dim;
+  font-size: 12px;
+}
+
+.widget-volume,
+.widget-backlight {
+  background: @bg_alt;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  color: @fg;
+}
+
+trough {
+  background: @surface;
+  border-radius: 12px;
+  min-height: 6px;
+}
+
+highlight {
+  background: @accent;
+  border-radius: 12px;
+  min-height: 6px;
+}
+
+slider {
+  background: @fg;
+  border-radius: 50%;
+  min-width: 12px;
+  min-height: 12px;
+  margin: -4px;
+}
+
+.blank-window {
+  background: transparent;
+}

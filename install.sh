@@ -55,8 +55,40 @@ link starship/starship.toml            "$HOME/.config/starship.toml"
 link nvim/init.lua                     "$HOME/.config/nvim/init.lua"
 link nvim/lua                          "$HOME/.config/nvim/lua"
 
-# Wave terminal
-link wave/settings.json                "$HOME/snap/waveterm/current/.config/waveterm/settings.json"
+# niri (Wayland compositor) and its shell components.
+link niri/config.kdl                   "$HOME/.config/niri/config.kdl"
+link waybar/config.jsonc               "$HOME/.config/waybar/config.jsonc"
+link waybar/style.css                  "$HOME/.config/waybar/style.css"
+link fuzzel/fuzzel.ini                 "$HOME/.config/fuzzel/fuzzel.ini"
+link swaync/config.json                "$HOME/.config/swaync/config.json"
+link swaync/style.css                  "$HOME/.config/swaync/style.css"
+
+link niri/set-wallpaper.sh             "$HOME/.local/bin/set-wallpaper"
+link niri/lock.sh                      "$HOME/.local/bin/lock-session"
+link niri/keys.sh                      "$HOME/.local/bin/niri-keys"
+chmod +x "$DOTFILES/niri/set-wallpaper.sh" "$DOTFILES/niri/lock.sh" \
+         "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/install-deps.sh"
+mkdir -p "$HOME/.config/wallpapers" "$HOME/Pictures/Screenshots"
+
+# Ubuntu ships waybar.service globally enabled and WantedBy=graphical-session
+# .target, which niri.service joins — so systemd starts a second bar on top of
+# the one niri/config.kdl spawns. Mask it so the config stays authoritative.
+if systemctl --user list-unit-files waybar.service >/dev/null 2>&1; then
+    if [[ "$(systemctl --user is-enabled waybar.service 2>/dev/null)" != "masked" ]]; then
+        systemctl --user mask waybar.service >/dev/null 2>&1 \
+            && echo "  mask: waybar.service (prevents a duplicate top bar)"
+    fi
+fi
+
+# Ulauncher — kept so the GNOME session still works as a fallback while you
+# settle into niri. Under niri the launcher is fuzzel (Mod+Space).
+# Link the single autostart entry, not all of ~/.config/autostart — other apps
+# drop their own .desktop files in that directory.
+link ulauncher/settings.json           "$HOME/.config/ulauncher/settings.json"
+link ulauncher/shortcuts.json          "$HOME/.config/ulauncher/shortcuts.json"
+link ulauncher/ulauncher.desktop       "$HOME/.config/autostart/ulauncher.desktop"
+chmod +x "$DOTFILES/ulauncher/gnome-keybinding.sh"
+"$DOTFILES/ulauncher/gnome-keybinding.sh"
 
 # Modern shell config (source this from ~/.zshrc or ~/.bashrc yourself)
 link .modern_shell_config              "$HOME/.modern_shell_config"
@@ -65,9 +97,17 @@ link .modern_shell_config              "$HOME/.modern_shell_config"
 link switch-theme.sh                   "$HOME/.local/bin/switch-theme"
 chmod +x "$DOTFILES/switch-theme.sh"
 
+# Apply the current theme so waybar/swaync get their theme.css symlink and
+# every surface starts in sync. Defaults to everblush on a fresh machine.
+CURRENT_THEME="$(cat "$HOME/.config/current-theme" 2>/dev/null || echo everblush)"
+echo
+echo "Applying theme: $CURRENT_THEME"
+"$DOTFILES/switch-theme.sh" "$CURRENT_THEME" || echo "  (theme switch failed — run switch-theme manually)"
+
 echo
 echo "Done. This script did NOT touch ~/.zshrc or ~/.bashrc."
 echo "If you haven't already, add this line to your shell rc:"
 echo "    source ~/.modern_shell_config"
 echo
 echo "Switch themes with:  switch-theme poimandres | cyberdream | everblush"
+echo "Install the niri desktop stack with:  ./niri/install-deps.sh"

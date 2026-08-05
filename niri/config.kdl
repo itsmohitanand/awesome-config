@@ -1,0 +1,398 @@
+// niri — scrollable-tiling Wayland compositor
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Overview
+//
+// Keybind policy: every binding here is Alt-based, because Super sits on a
+// home-row mod on the ZSA Voyager and is awkward to hold. Nothing binds a bare
+// Ctrl+key, so zellij's Ctrl+G/P/T/N/H/S/O/Q keep working untouched.
+//
+// The cost of Alt: the compositor now swallows Alt+key before the terminal sees
+// it, which breaks readline/zsh word operations. Rebound to stay clear of the
+// ones actually worth keeping — see the note above the binds block.
+//
+// Design note: niri has no blur. Polish here comes from the focus-ring gradient,
+// rounded geometry, shadows, and spring animations — not glassmorphism. Panels
+// are opaque on purpose. See README.
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+        repeat-delay 300
+        repeat-rate 50
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+        dwt
+        accel-profile "adaptive"
+        scroll-method "two-finger"
+    }
+
+    mouse {
+        accel-profile "flat"
+    }
+
+    // Keyboard focus only — the whole point is not touching the mouse.
+    focus-follows-mouse max-scroll-amount="0%"
+}
+
+// LG UltraGear 4K/144Hz on the RTX 5070 Ti. Pinning the mode stops niri
+// renegotiating down to 60Hz after sleep or a monitor power-cycle.
+//
+// variable-refresh-rate on-demand: G-Sync engages only for fullscreen windows
+// that ask for it (games, video). The desktop stays at a fixed 144Hz, which
+// avoids the brightness flicker some panels show when the refresh rate swings
+// between idle and scrolling. Drop `on-demand` to run VRR everywhere.
+//
+// Re-check the name with `niri msg outputs` if you replug into another port.
+// Two identical LG UltraGears. Positions are explicit so they can't swap
+// around between boots — DP-5 on the left at the origin, HDMI-A-3 to its right.
+output "DP-5" {
+    mode "3840x2160@144.050"
+    scale 1.25
+    position x=0 y=0
+    variable-refresh-rate on-demand=true
+}
+
+// HDMI-A-3 advertises 59.997 as "preferred", but the panel does 119.88 — pin it
+// or you silently run this display at half the refresh rate of the other.
+output "HDMI-A-3" {
+    mode "3840x2160@119.880"
+    scale 1.25
+    position x=3072 y=0
+    variable-refresh-rate on-demand=true
+}
+
+// This machine has two GPUs — the 5070 Ti (renderD128) and the Ryzen iGPU
+// (renderD129). niri picks the NVIDIA card automatically, but DRM node
+// numbering isn't guaranteed stable across boots. If it ever renders on the
+// iGPU (slow, or the monitor goes dark), pin it:
+//     debug { render-drm-device "/dev/dri/by-path/pci-0000:01:00.0-render"; }
+
+layout {
+    gaps 12
+    background-color "transparent"
+
+    // Never auto-center; the strip stays where you put it.
+    center-focused-column "never"
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    // Half-width default: nvim on the left, browser on the right, both readable.
+    default-column-width { proportion 0.5; }
+
+    focus-ring {
+        width 2
+        // switch-theme rewrites these two lines — keep them on one line each.
+        active-gradient from="#6cbfbf" to="#67b0e8" angle=45 relative-to="workspace-view"
+        inactive-color "#2d3437"
+    }
+
+    border {
+        off
+    }
+
+    shadow {
+        on
+        softness 30
+        spread 4
+        offset x=0 y=6
+        color "#00000055"
+    }
+
+    struts {
+        left 0
+        right 0
+        top 0
+        bottom 0
+    }
+}
+
+// ─── Startup ────────────────────────────────────────────────────────────────
+// Order matters a little: portals and the polkit agent should be up before apps.
+
+spawn-at-startup "/usr/libexec/xdg-desktop-portal-gnome"
+
+// Ubuntu's waybar package ships a globally-enabled waybar.service that is
+// WantedBy=graphical-session.target, which niri.service joins — so it would
+// start a SECOND bar alongside this one. It's masked for this user:
+//     systemctl --user mask waybar.service
+// install.sh does this for you. Undo with `systemctl --user unmask waybar.service`
+// if you'd rather let systemd own the bar than this config.
+spawn-at-startup "waybar"
+spawn-at-startup "swaync"
+// Copenhagen. At 55.7°N the summer/winter daylight swing is extreme, so let
+// wlsunset compute from coordinates rather than pinning fixed times.
+spawn-at-startup "wlsunset" "-l" "55.68" "-L" "12.57"
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+
+// Idle: dim-free, just lock at 10min, screens off at 12min, lock before suspend.
+// The -w on before-sleep makes the lock finish before the machine suspends.
+spawn-at-startup "swayidle" "-w" \
+    "timeout" "600" "lock-session" \
+    "timeout" "720" "niri msg action power-off-monitors" \
+    "resume" "niri msg action power-on-monitors" \
+    "before-sleep" "lock-session"
+spawn-at-startup "sh" "-c" "$HOME/.local/bin/set-wallpaper"
+
+// XWayland for X11 apps (Slack, Discord, older GTK). niri 26.04 manages the
+// satellite process itself — don't spawn it manually and don't set DISPLAY,
+// niri sets that for spawned children once the satellite is up.
+// Absolute path because ~/.cargo/bin isn't on PATH for a GDM-launched session.
+// Logs a warning and disables the integration if not installed:
+//   cargo install --git https://github.com/Supreeeme/xwayland-satellite --locked
+xwayland-satellite {
+    path "/home/mohit-anand/.cargo/bin/xwayland-satellite"
+}
+
+environment {
+    // A GDM-launched niri inherits a bare system PATH with no ~/.local/bin and
+    // no ~/.cargo/bin, so `spawn "niri-keys"` / `spawn "lock-session"` resolve
+    // to nothing and fail silently — no error, the key just does nothing.
+    // Set it explicitly for every child niri spawns.
+    PATH "/home/mohit-anand/.local/bin:/home/mohit-anand/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+
+    // Force Electron/Chromium apps onto native Wayland — otherwise they render
+    // blurry through XWayland on HiDPI.
+    NIXOS_OZONE_WL "1"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    MOZ_ENABLE_WAYLAND "1"
+    QT_QPA_PLATFORM "wayland"
+    QT_QPA_PLATFORMTHEME "qt6ct"
+    XCURSOR_THEME "Yaru"
+    XCURSOR_SIZE "24"
+}
+
+cursor {
+    xcursor-theme "Yaru"
+    xcursor-size 24
+    hide-when-typing
+}
+
+// Server-side decorations: no mismatched GTK titlebars floating around.
+prefer-no-csd
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+// ─── Animations ─────────────────────────────────────────────────────────────
+// Springs, not linear easing. Slightly stiffer than niri's defaults so it feels
+// responsive rather than floaty.
+
+animations {
+    slowdown 1.0
+
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+    }
+
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+
+    window-movement {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+
+    window-open {
+        duration-ms 180
+        curve "ease-out-expo"
+    }
+
+    window-close {
+        duration-ms 140
+        curve "ease-out-quad"
+    }
+
+    window-resize {
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+    }
+
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+}
+
+// ─── Window rules ───────────────────────────────────────────────────────────
+
+window-rule {
+    geometry-corner-radius 10
+    clip-to-geometry true
+}
+
+// Terminals and the editor get a bit more room by default.
+window-rule {
+    match app-id="^kitty$"
+    default-column-width { proportion 0.5; }
+}
+
+window-rule {
+    match app-id="^firefox$"
+    default-column-width { proportion 0.66667; }
+}
+
+// Dialogs and pickers float instead of joining the strip. Nautilus matches
+// here too, but its main window is excluded so only its dialogs float.
+window-rule {
+    match app-id="^org.gnome.Nautilus$"
+    match app-id="^xdg-desktop-portal-gnome$"
+    match app-id="^gcr-prompter$"
+    exclude app-id="^org.gnome.Nautilus$" title="Files$"
+    open-floating true
+}
+
+// Picture-in-picture stays on top, floating, out of the way.
+window-rule {
+    match app-id="^firefox$" title="^Picture-in-Picture$"
+    open-floating true
+    default-floating-position x=32 y=32 relative-to="bottom-right"
+}
+
+layer-rule {
+    match namespace="^waybar$"
+    // Bar sits above the shadow layer without gaining a shadow of its own.
+    shadow { off; }
+}
+
+// ─── Keybinds ───────────────────────────────────────────────────────────────
+// Mod = Super. Reminder: no bare-Ctrl bindings (zellij owns those).
+
+binds {
+    // niri's built-in overlay only shows a curated subset (a hardcoded list of
+    // ~17 actions, plus binds with a hotkey-overlay-title, plus spawn binds
+    // whose modifier is Mod/Super — which excludes all our Alt binds).
+    // niri-keys parses this file directly, so it shows everything.
+    Alt+Shift+Slash hotkey-overlay-title="All shortcuts" { spawn "niri-keys"; }
+    Alt+Slash       hotkey-overlay-title="Built-in overlay" { show-hotkey-overlay; }
+
+    // Launching
+    Alt+Return hotkey-overlay-title="Terminal" { spawn "kitty"; }
+    Alt+Space  hotkey-overlay-title="Launcher" { spawn "fuzzel"; }
+    // Not Alt+B — that's readline backward-word, which is worth keeping.
+    Alt+Shift+B hotkey-overlay-title="Browser" { spawn "firefox"; }
+    Alt+E      hotkey-overlay-title="Files"    { spawn "kitty" "-e" "yazi"; }
+    Alt+V      hotkey-overlay-title="Clipboard history" {
+        spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy";
+    }
+    Alt+N      hotkey-overlay-title="Notifications" { spawn "swaync-client" "-t" "-sw"; }
+    // Not Alt+L — that's focus-column-right. Lock is Alt+Escape.
+    Alt+Escape hotkey-overlay-title="Lock"     { spawn "lock-session"; }
+
+    Alt+Q { close-window; }
+
+    // Focus — hjkl and arrows both work. The "or-monitor" variants mean that
+    // scrolling past the end of the strip crosses onto the other monitor
+    // instead of stopping dead, so hjkl alone covers both displays.
+    Alt+H     { focus-column-or-monitor-left; }
+    Alt+L     { focus-column-or-monitor-right; }
+    Alt+J     { focus-window-or-monitor-down; }
+    Alt+K     { focus-window-or-monitor-up; }
+    Alt+Left  { focus-column-or-monitor-left; }
+    Alt+Right { focus-column-or-monitor-right; }
+    Alt+Down  { focus-window-or-monitor-down; }
+    Alt+Up    { focus-window-or-monitor-up; }
+
+    // Move windows within the strip — and across to the other monitor when
+    // pushed past the end.
+    Alt+Shift+H     { move-column-left-or-to-monitor-left; }
+    Alt+Shift+L     { move-column-right-or-to-monitor-right; }
+    Alt+Shift+J     { move-window-down; }
+    Alt+Shift+K     { move-window-up; }
+    Alt+Shift+Left  { move-column-left; }
+    Alt+Shift+Right { move-column-right; }
+    Alt+Shift+Down  { move-window-down; }
+    Alt+Shift+Up    { move-window-up; }
+
+    // Jump to the ends of the strip.
+    Alt+Home { focus-column-first; }
+    Alt+End  { focus-column-last; }
+
+    // Explicit monitor control. Ctrl is safe in combination with Alt — the
+    // terminal never sees these, only a bare Ctrl+key would reach it.
+    Alt+Ctrl+H       { focus-monitor-left; }
+    Alt+Ctrl+L       { focus-monitor-right; }
+    Alt+Ctrl+Shift+H { move-column-to-monitor-left; }
+    Alt+Ctrl+Shift+L { move-column-to-monitor-right; }
+    // Move the whole workspace, not just one column — this is what you want
+    // when everything has opened on the wrong screen.
+    Alt+Ctrl+Shift+U { move-workspace-to-monitor-left; }
+    Alt+Ctrl+Shift+I { move-workspace-to-monitor-right; }
+
+    // Workspaces (vertical stack in niri).
+    Alt+U { focus-workspace-down; }
+    Alt+I { focus-workspace-up; }
+    Alt+Shift+U { move-column-to-workspace-down; }
+    Alt+Shift+I { move-column-to-workspace-up; }
+
+    Alt+1 { focus-workspace 1; }
+    Alt+2 { focus-workspace 2; }
+    Alt+3 { focus-workspace 3; }
+    Alt+4 { focus-workspace 4; }
+    Alt+5 { focus-workspace 5; }
+    Alt+6 { focus-workspace 6; }
+    Alt+7 { focus-workspace 7; }
+    Alt+8 { focus-workspace 8; }
+    Alt+9 { focus-workspace 9; }
+
+    Alt+Shift+1 { move-column-to-workspace 1; }
+    Alt+Shift+2 { move-column-to-workspace 2; }
+    Alt+Shift+3 { move-column-to-workspace 3; }
+    Alt+Shift+4 { move-column-to-workspace 4; }
+    Alt+Shift+5 { move-column-to-workspace 5; }
+    Alt+Shift+6 { move-column-to-workspace 6; }
+    Alt+Shift+7 { move-column-to-workspace 7; }
+    Alt+Shift+8 { move-column-to-workspace 8; }
+    Alt+Shift+9 { move-column-to-workspace 9; }
+
+    // Sizing
+    Alt+R       { switch-preset-column-width; }
+    Alt+Shift+R { switch-preset-window-height; }
+    // Not Alt+F — that's readline forward-word. M for maximize.
+    Alt+M       { maximize-column; }
+    Alt+Shift+F { fullscreen-window; }
+    Alt+C       { center-column; }
+    Alt+Minus   { set-column-width "-10%"; }
+    Alt+Equal   { set-column-width "+10%"; }
+    Alt+Shift+Minus { set-window-height "-10%"; }
+    Alt+Shift+Equal { set-window-height "+10%"; }
+
+    // Column composition — pull the next window into this column or push it out.
+    // Brackets, not comma/period: Alt+. is readline insert-last-argument, which
+    // is far too useful in a shell to give up.
+    Alt+BracketLeft  { consume-or-expel-window-left; }
+    Alt+BracketRight { consume-or-expel-window-right; }
+
+    // Overview — niri's built-in zoomed-out view of every workspace.
+    Alt+O { toggle-overview; }
+
+    Alt+W { toggle-window-floating; }
+
+    // Screenshots (built in — no flameshot needed).
+    Print            { screenshot; }
+    Ctrl+Print       { screenshot-screen; }
+    Alt+Print        { screenshot-window; }
+
+    // Media and hardware keys.
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" "--limit" "1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86AudioPlay        allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+
+    // Session
+    Alt+Shift+E { quit; }
+    Alt+Shift+P { power-off-monitors; }
+}

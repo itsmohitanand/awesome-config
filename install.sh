@@ -54,6 +54,10 @@ link starship/starship.toml            "$HOME/.config/starship.toml"
 # Neovim
 link nvim/init.lua                     "$HOME/.config/nvim/init.lua"
 link nvim/lua                          "$HOME/.config/nvim/lua"
+# lazy.nvim writes its lockfile next to init.lua. Symlinked so `:Lazy sync`
+# updates the tracked file directly — without this, lazy creates its own real
+# file there and each machine silently drifts to different plugin commits.
+link nvim/lazy-lock.json               "$HOME/.config/nvim/lazy-lock.json"
 
 # niri (Wayland compositor) and its shell components.
 link niri/config.kdl                   "$HOME/.config/niri/config.kdl"
@@ -69,6 +73,24 @@ link niri/keys.sh                      "$HOME/.local/bin/niri-keys"
 chmod +x "$DOTFILES/niri/set-wallpaper.sh" "$DOTFILES/niri/lock.sh" \
          "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/install-deps.sh"
 mkdir -p "$HOME/.config/wallpapers" "$HOME/Pictures/Screenshots"
+
+# Pre-rendered wallpapers, one per theme, so a fresh clone has them without
+# waiting on a 400M-point render. Re-roll any of them in place with:
+#   ./niri/make-wallpaper-chaos.py <theme> niri/wallpapers/<theme>.png
+# Symlinks, so a re-render shows up on the next switch-theme with no re-install.
+link niri/wallpapers/everblush.png     "$HOME/.config/wallpapers/everblush.png"
+link niri/wallpapers/poimandres.png    "$HOME/.config/wallpapers/poimandres.png"
+link niri/wallpapers/cyberdream.png    "$HOME/.config/wallpapers/cyberdream.png"
+
+# niri isn't in the Ubuntu archive, so the configs above are inert until it's
+# built. Ask rather than run it unprompted — install-deps.sh needs sudo and a
+# source build takes a while. ponytail: prompt, not a --yes flag; add one when
+# this needs to run unattended.
+if ! command -v niri >/dev/null; then
+    read -rp "  niri not installed. Run niri/install-deps.sh now? [y/N] " ok
+    [[ "$ok" == [yY] ]] && "$DOTFILES/niri/install-deps.sh" \
+        || echo "  skipped: run ./niri/install-deps.sh when you want the niri session"
+fi
 
 # Ubuntu ships waybar.service globally enabled and WantedBy=graphical-session
 # .target, which niri.service joins — so systemd starts a second bar on top of

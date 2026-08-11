@@ -100,6 +100,38 @@ switch-theme cyberdream
 
 The active theme is recorded in `~/.config/current-theme`.
 
+### Wallpapers
+
+One pre-rendered 4K wallpaper per theme ships in `niri/wallpapers/`, symlinked
+into `~/.config/wallpapers/` by `install.sh` — a fresh clone is themed with no
+render step. They cost ~13MB of repo, which is the deal for not waiting on a
+400M-point render per machine.
+
+`niri/make-wallpaper-chaos.py <theme>` is what generated them: the invariant
+measure of a 2-D chaotic map — Clifford by default, or `--system dejong|ikeda` —
+coloured from the theme's own palette. Re-roll one in place and the symlink picks
+it up on the next `switch-theme`, no re-install:
+
+```bash
+./niri/make-wallpaper-chaos.py cyberdream niri/wallpapers/cyberdream.png
+```
+
+`niri/make-wallpaper.py` is the cheap alternative: gradient, two accent glows,
+grain. Seconds instead of a minute, no numpy.
+
+Output is 3840x2160 by default, which downscales cleanly onto any 16:9 panel.
+`swww` crop-to-fills, though, so a screen of a different aspect — a rotated
+portrait panel especially — gets a slice of the middle rather than the whole
+attractor. Render at that panel's own resolution instead:
+
+```bash
+./niri/make-wallpaper-chaos.py everblush wall.png --size 1440x2560 --zoom 0.95
+```
+
+`--zoom` <1 crops into the filaments, `--offset` shifts it clear of where you
+keep windows. Applying different images per output needs `swww img --outputs`;
+`set-wallpaper` sets one image for all of them.
+
 Waybar and swaync share one palette file (`themes/<name>.css`) because both use
 GTK CSS — the `@define-color` names are the single source of truth for the
 desktop chrome. `switch-theme.sh` carries a matching palette table for the
@@ -130,7 +162,10 @@ awesome-config/
 ├── niri/
 │   ├── config.kdl          # → ~/.config/niri/config.kdl
 │   ├── install-deps.sh     # apt packages + niri build (not symlinked)
-│   └── set-wallpaper.sh    # → ~/.local/bin/set-wallpaper
+│   ├── set-wallpaper.sh    # → ~/.local/bin/set-wallpaper
+│   ├── make-wallpaper-chaos.py  # strange-attractor renderer (numpy + pillow)
+│   └── wallpapers/         # pre-rendered 4K, one per theme
+│       └── <theme>.png     # → ~/.config/wallpapers/<theme>.png
 ├── waybar/
 │   ├── config.jsonc        # → ~/.config/waybar/config.jsonc
 │   └── style.css           # → ~/.config/waybar/style.css
@@ -197,3 +232,49 @@ Sourced from your shell rc. Provides:
 - Docker aliases (`d`, `dc`, `dps`, ...)
 - Utility functions: `mkcd`, `extract`, `topcmds`, `hr`
 - Starship prompt initialisation
+- dstask aliases and completion (see below)
+
+## Tasks (`dstask`)
+
+Taskwarrior-like CLI with no sync server: the store is a git repo holding one
+YAML file per task, and every add/modify auto-commits. `dstask sync` is pull then
+push with an automatic merge commit.
+
+Three separate git repos, deliberately — config here, notes in
+`~/Documents/notes`, tasks in `~/Documents/tasks`
+([itsmohitanand/tasks](https://github.com/itsmohitanand/tasks)). dstask expects to
+own its repo and commits on its own schedule, so sharing a branch with anything
+else invites conflicts.
+
+Install needs no sudo. Ubuntu 24.04 ships Go 1.22 and dstask needs 1.23.4, so
+take the toolchain from go.dev:
+
+```bash
+curl -sSL -o /tmp/go.tar.gz https://go.dev/dl/go1.26.5.linux-amd64.tar.gz
+# verify against the sha256 published at https://go.dev/dl/
+tar -C ~/.local -xzf /tmp/go.tar.gz
+PATH="$HOME/.local/go/bin:$PATH" GOBIN="$HOME/.local/bin" \
+    go install github.com/naggie/dstask/cmd/dstask@v1.0.1
+```
+
+Build from source rather than the release binary: v1.0.1's `checksums.sha256`
+lists filenames that match none of the attached assets, so the prebuilt binaries
+have no usable checksum. `go install` verifies through `sum.golang.org`.
+
+New machine:
+
+```bash
+git clone https://github.com/itsmohitanand/tasks.git ~/Documents/tasks
+```
+
+| Alias | Command |
+| ----- | ------- |
+| `t`   | `dstask` |
+| `tn`  | `dstask next` — pending, filtered by context |
+| `ta`  | `dstask add` |
+| `ts`  | `dstask sync` |
+
+`DSTASK_GIT_REPO` points at `~/Documents/tasks`; bash/zsh completion is sourced
+from `dstask {bash,zsh}-completion` when the binary is on `PATH`. Context is
+per-machine and *not* synced — set it with `dstask context +work` and it applies
+automatically to new tasks.

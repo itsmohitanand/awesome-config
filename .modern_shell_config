@@ -127,6 +127,37 @@ alias dlogs='docker logs -f'
 alias dprune='docker system prune -f'
 
 # ============================================================================
+# TASKS — dstask
+# ============================================================================
+# Taskwarrior-ish CLI, but the store is a git repo of one YAML file per task and
+# `dstask sync` is pull-then-push with an auto merge commit — no taskd to run.
+# Its own repo, separate from config and from ~/Documents/notes:
+#   git init ~/Documents/tasks && git -C ~/Documents/tasks remote add origin <url>
+# Install (no sudo; Ubuntu's Go is too old for dstask's go 1.23.4):
+#   curl -sSL -o /tmp/go.tar.gz https://go.dev/dl/go1.26.5.linux-amd64.tar.gz
+#   tar -C ~/.local -xzf /tmp/go.tar.gz     # verify the sha256 from go.dev/dl first
+#   PATH="$HOME/.local/go/bin:$PATH" GOBIN="$HOME/.local/bin" \
+#       go install github.com/naggie/dstask/cmd/dstask@v1.0.1
+export DSTASK_GIT_REPO="$HOME/Documents/tasks"
+
+if command -v dstask >/dev/null; then
+    alias t='dstask'
+    alias tn='dstask next'          # default view: pending, context-filtered
+    alias ta='dstask add'
+    alias ts='dstask sync'          # git pull + push, auto merge commit
+    # Context is deliberately NOT synced between machines — set it per machine,
+    # e.g. `dstask context +work`, and it auto-applies to new tasks.
+
+    # ponytail: completion sourced only for the shell actually running. dstask
+    # prints the script to stdout rather than shipping a file to install.
+    if [ -n "${ZSH_VERSION:-}" ]; then
+        source <(dstask zsh-completion)
+    elif [ -n "${BASH_VERSION:-}" ]; then
+        source <(dstask bash-completion)
+    fi
+fi
+
+# ============================================================================
 # ALIASES — Editors / Multiplexers
 # ============================================================================
 alias vi='nvim'

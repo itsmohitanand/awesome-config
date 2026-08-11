@@ -1,0 +1,4 @@
+# Claude Code per-machine permission grants — local state, not shared config.
+.claude/settings.local.json
+
+__pycache__/

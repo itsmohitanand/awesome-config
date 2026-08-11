@@ -197,7 +197,22 @@ def main():
                     help="shift right by this fraction of the frame")
     ap.add_argument("--supersample", type=int, default=2,
                     help="render at Nx then downscale; 1 disables")
+    # Render at the panel's own resolution rather than letting swww crop-to-fill a
+    # 16:9 image — frame() fits the histogram window to the canvas aspect, so a
+    # portrait canvas composes the attractor for portrait instead of slicing the
+    # middle out of a landscape one.
+    ap.add_argument("--size", metavar="WxH",
+                    help=f"output resolution (default {OUT_W}x{OUT_H})")
     args = ap.parse_args()
+
+    out_w, out_h = OUT_W, OUT_H
+    if args.size:
+        try:
+            out_w, out_h = (int(v) for v in args.size.lower().split("x"))
+        except ValueError:
+            sys.exit(f"--size wants WxH, got {args.size!r}")
+        if out_w < 1 or out_h < 1:
+            sys.exit("--size dimensions must be positive")
 
     out = args.outfile or f"{args.theme}-{args.system}.png"
 
@@ -205,7 +220,7 @@ def main():
     # filaments. Binning *below* native and scaling up (as this script did
     # originally) throws away the fine structure and looks soft at 4K.
     ss = max(1, args.supersample)
-    w, h = OUT_W * ss, OUT_H * ss
+    w, h = out_w * ss, out_h * ss
 
     print(f"{args.system}: {args.points:,} points into {w}x{h}", flush=True)
     cx, cy = ensemble(args.system)
@@ -217,7 +232,7 @@ def main():
 
     im = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
     if ss > 1:
-        im = im.resize((OUT_W, OUT_H), Image.LANCZOS)
+        im = im.resize((out_w, out_h), Image.LANCZOS)
     im.save(out, optimize=True)
     print(f"wrote {out}")
 

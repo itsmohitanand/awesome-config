@@ -38,7 +38,7 @@ input {
     focus-follows-mouse max-scroll-amount="0%"
 }
 
-// LG UltraGear 4K/144Hz on the RTX 5090. Pinning the mode stops niri
+// LG UltraGear 4K/144Hz on the home desk's RTX 5070 Ti. Pinning the mode stops niri
 // renegotiating down to 60Hz after sleep or a monitor power-cycle.
 //
 // variable-refresh-rate on-demand: G-Sync engages only for fullscreen windows
@@ -85,11 +85,13 @@ output "HDMI-A-3" {
 // output "HDMI-A-1" { mode "2560x1440@74.98"; position x=2560 y=0 }
 // output "DP-1"     { mode "2560x1440@74.98"; position x=5120 y=0 }
 
-// Two GPUs — the RTX 5090 at pci 01:00.0 and the AMD iGPU at 74:00.0. Do NOT
-// identify them by renderD number: on this box the iGPU enumerates *first*
-// (renderD128 = iGPU, renderD129 = NVIDIA), and the order is not guaranteed
-// across boots or between the two desks anyway. Pinned by PCI path, which is
-// stable, so niri can't fall back to the iGPU and render slowly or come up dark.
+// Two GPUs on both desks: an NVIDIA card at pci 01:00.0 plus the AMD iGPU —
+// 5070 Ti / iGPU at 73:00.0 at home, 5090 / iGPU at 74:00.0 at the office. Do
+// NOT identify them by renderD number: the two boxes enumerate in *opposite*
+// order (home renderD128 = NVIDIA, office renderD128 = iGPU), and the order
+// isn't guaranteed across boots either. Pinned by PCI path, which is stable and
+// happens to be 01:00.0 on both, so niri can't fall back to the iGPU and render
+// slowly or come up dark.
 // Drop this block to let niri choose, or repoint it if the card moves slots.
 debug {
     render-drm-device "/dev/dri/by-path/pci-0000:01:00.0-render"

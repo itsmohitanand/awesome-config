@@ -130,6 +130,8 @@ swww is also a cargo **workspace**, so both packages must be named:
 
 Two GPUs: RTX 5090 at `01:00.0`, AMD iGPU at `74:00.0`. Do **not** identify them
 by `renderD` number — on this box the iGPU enumerates *first* (`renderD128` =
-iGPU, `renderD129` = NVIDIA), the reverse of what you'd assume. `config.kdl` pins
-the render device by PCI path, which is stable, so niri can't fall back to the
-iGPU and render slowly or come up dark.
+iGPU, `renderD129` = NVIDIA), the reverse of what you'd assume — and the reverse
+of the home box, which has a 5070 Ti at the same `01:00.0`, its iGPU at
+`73:00.0`, and `renderD128` = NVIDIA. Same slot, opposite numbering: that's the
+whole argument. `config.kdl` pins the render device by PCI path, which is stable,
+so niri can't fall back to the iGPU and render slowly or come up dark.

@@ -96,6 +96,10 @@ if edit "$FUZZEL_CONF"; then
     python3 - "$FUZZEL_CONF" <<EOF
 import re, sys
 path = sys.argv[1]
+# prompt/placeholder/input/counter need fuzzel >= 1.11; 1.9.2 aborts on the
+# first unknown key and kills the launcher entirely. install-deps.sh builds
+# 1.12.0 into ~/.local/bin — see the header in fuzzel/fuzzel.ini before
+# touching this list.
 block = """background=${BG}ff
 text=${FG}ff
 prompt=${FG_DIM}ff

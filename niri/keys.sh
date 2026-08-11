@@ -55,11 +55,25 @@ PRETTY = {
     "power-off-monitors":               "Screens off",
 }
 
-rows = []
-for line in block.splitlines():
-    line = line.strip()
-    if not line or line.startswith("//"):
+# Binds whose body is long enough to wrap are written across several lines in
+# the config. Fold each one back onto a single line first, otherwise the match
+# below silently skips them and they vanish from the list.
+folded, buf, depth = [], None, 0
+for raw in block.splitlines():
+    line = raw.strip()
+    if not line or line.startswith("//") or line == "binds {":
         continue
+    if buf is None:
+        buf, depth = line, 0
+    else:
+        buf += " " + line
+    depth += line.count("{") - line.count("}")
+    if depth <= 0:
+        folded.append(" ".join(buf.split()))
+        buf = None
+
+rows = []
+for line in folded:
     m = re.match(r'^([A-Za-z0-9+_]+)\s*(.*?)\{\s*(.*?)\s*;?\s*\}$', line)
     if not m:
         continue

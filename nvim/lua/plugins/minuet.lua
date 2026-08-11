@@ -7,14 +7,14 @@ return {
       context_window = 8192,
       throttle = 1500,
       debounce = 400,
-      request_timeout = 3,
+      request_timeout = 10,
       notify = 'warn',
       provider_options = {
         openai_fim_compatible = {
           api_key = 'TERM',
           name = 'Ollama',
           end_point = 'http://localhost:11434/v1/completions',
-          model = 'qwen2.5-coder:3b-base',
+          model = 'deepseek-coder-v2:lite',
           optional = {
             max_tokens = 256,
             top_p = 0.9,

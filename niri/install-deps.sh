@@ -36,6 +36,7 @@ sudo apt install -y \
     playerctl \
     brightnessctl \
     pavucontrol \
+    qalculate-gtk \
     wireplumber \
     xdg-desktop-portal-gnome \
     xdg-desktop-portal-gtk \

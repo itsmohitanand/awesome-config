@@ -250,6 +250,17 @@ window-rule {
     open-floating true
 }
 
+// The calculator is a scratch tool, not something to give a column to. Fixed
+// size because a calculator stretched across half the strip looks absurd.
+// gnome-calculator is matched too so it floats if it gets opened from a menu.
+window-rule {
+    match app-id="^qalculate-gtk$"
+    match app-id="^org.gnome.Calculator$"
+    open-floating true
+    default-column-width { fixed 460; }
+    default-window-height { fixed 620; }
+}
+
 // Picture-in-picture stays on top, floating, out of the way.
 window-rule {
     match app-id="^firefox$" title="^Picture-in-Picture$"
@@ -280,6 +291,12 @@ binds {
     // Not Alt+B — that's readline backward-word, which is worth keeping.
     Alt+Shift+B hotkey-overlay-title="Browser" { spawn "firefox"; }
     Alt+E      hotkey-overlay-title="Files"    { spawn "kitty" "-e" "yazi"; }
+    // Not Alt+C — that's center-column. qalculate does units, currency and
+    // symbolic algebra, so it's worth a key; gnome-calculator is the fallback
+    // if it isn't installed.
+    Alt+Shift+C hotkey-overlay-title="Calculator" {
+        spawn "sh" "-c" "command -v qalculate-gtk >/dev/null && exec qalculate-gtk || exec gnome-calculator";
+    }
     Alt+V      hotkey-overlay-title="Clipboard history" {
         spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy";
     }
@@ -389,6 +406,10 @@ binds {
     XF86AudioPlay        allow-when-locked=true { spawn "playerctl" "play-pause"; }
     XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
     XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
+    // Keyboards with a dedicated calculator key. Harmless if yours has none.
+    XF86Calculator hotkey-overlay-title="Calculator" {
+        spawn "sh" "-c" "command -v qalculate-gtk >/dev/null && exec qalculate-gtk || exec gnome-calculator";
+    }
     XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
     XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
 

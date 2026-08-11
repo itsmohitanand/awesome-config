@@ -38,7 +38,7 @@ input {
     focus-follows-mouse max-scroll-amount="0%"
 }
 
-// LG UltraGear 4K/144Hz on the RTX 5070 Ti. Pinning the mode stops niri
+// LG UltraGear 4K/144Hz on the RTX 5090. Pinning the mode stops niri
 // renegotiating down to 60Hz after sleep or a monitor power-cycle.
 //
 // variable-refresh-rate on-demand: G-Sync engages only for fullscreen windows
@@ -65,11 +65,35 @@ output "HDMI-A-3" {
     variable-refresh-rate on-demand=true
 }
 
-// This machine has two GPUs — the 5070 Ti (renderD128) and the Ryzen iGPU
-// (renderD129). niri picks the NVIDIA card automatically, but DRM node
-// numbering isn't guaranteed stable across boots. If it ever renders on the
-// iGPU (slow, or the monitor goes dark), pin it:
-//     debug { render-drm-device "/dev/dri/by-path/pci-0000:01:00.0-render"; }
+// Office desk: three 1440p panels instead of the two 4K LGs above. Output blocks
+// naming a monitor that isn't connected are simply ignored, so both desks live in
+// this one file — no per-machine config.
+//
+// Uncomment after checking `niri msg outputs` for the real names and refresh
+// rates. DP-N usually keeps its number from X11; X11's HDMI-0 turns up as
+// HDMI-A-1 (or -2/-3) on the DRM side, so that one has to be confirmed.
+//
+// Three identical 2560x1440 landscape panels, left to right. All y=0 — X11 has
+// them at y=791/791/0 (left over from when DP-1 was rotated portrait and the
+// other two were centred against its 2560px height), which leaves the pointer
+// stepping up and down as it crosses screens. Don't carry that over.
+//
+// All three do 74.98 but come up at 59.95 as "preferred" — same trap as
+// HDMI-A-3 above, so pin the higher rate. Confirm the exact string niri reports.
+//
+// output "DP-3"     { mode "2560x1440@74.98"; position x=0    y=0 }
+// output "HDMI-A-1" { mode "2560x1440@74.98"; position x=2560 y=0 }
+// output "DP-1"     { mode "2560x1440@74.98"; position x=5120 y=0 }
+
+// Two GPUs — the RTX 5090 at pci 01:00.0 and the AMD iGPU at 74:00.0. Do NOT
+// identify them by renderD number: on this box the iGPU enumerates *first*
+// (renderD128 = iGPU, renderD129 = NVIDIA), and the order is not guaranteed
+// across boots or between the two desks anyway. Pinned by PCI path, which is
+// stable, so niri can't fall back to the iGPU and render slowly or come up dark.
+// Drop this block to let niri choose, or repoint it if the card moves slots.
+debug {
+    render-drm-device "/dev/dri/by-path/pci-0000:01:00.0-render"
+}
 
 layout {
     gaps 12
@@ -138,25 +162,28 @@ spawn-at-startup "swayidle" "-w" \
     "timeout" "600" "lock-session" \
     "timeout" "720" "niri msg action power-off-monitors" \
     "resume" "niri msg action power-on-monitors" \
-    "before-sleep" "lock-session"
+    "before-sleep" "$HOME/.local/bin/lock-session"
 spawn-at-startup "sh" "-c" "$HOME/.local/bin/set-wallpaper"
 
 // XWayland for X11 apps (Slack, Discord, older GTK). niri 26.04 manages the
 // satellite process itself — don't spawn it manually and don't set DISPLAY,
 // niri sets that for spawned children once the satellite is up.
-// Absolute path because ~/.cargo/bin isn't on PATH for a GDM-launched session.
+// Tilde path, not /home/<user> — this config is symlinked from a repo shared
+// across machines. ~/.cargo/bin isn't on PATH for a GDM-launched session, so the
+// path has to be explicit either way.
 // Logs a warning and disables the integration if not installed:
 //   cargo install --git https://github.com/Supreeeme/xwayland-satellite --locked
 xwayland-satellite {
-    path "/home/mohit-anand/.cargo/bin/xwayland-satellite"
+    path "~/.cargo/bin/xwayland-satellite"
 }
 
 environment {
-    // A GDM-launched niri inherits a bare system PATH with no ~/.local/bin and
-    // no ~/.cargo/bin, so `spawn "niri-keys"` / `spawn "lock-session"` resolve
-    // to nothing and fail silently — no error, the key just does nothing.
-    // Set it explicitly for every child niri spawns.
-    PATH "/home/mohit-anand/.local/bin:/home/mohit-anand/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+    // ponytail: no PATH override here — `environment` values are literal, niri
+    // expands neither ~ nor $HOME, so any PATH listing ~/.local/bin would have to
+    // hardcode a username. Instead the two binds that need it (niri-keys,
+    // lock-session) go through `sh -c "$HOME/.local/bin/..."`, same as
+    // spawn-at-startup above. Add a PATH line back only if some child that isn't
+    // spawned by this config needs ~/.local/bin.
 
     // Force Electron/Chromium apps onto native Wayland — otherwise they render
     // blurry through XWayland on HiDPI.
@@ -282,7 +309,7 @@ binds {
     // ~17 actions, plus binds with a hotkey-overlay-title, plus spawn binds
     // whose modifier is Mod/Super — which excludes all our Alt binds).
     // niri-keys parses this file directly, so it shows everything.
-    Alt+Shift+Slash hotkey-overlay-title="All shortcuts" { spawn "niri-keys"; }
+    Alt+Shift+Slash hotkey-overlay-title="All shortcuts" { spawn "sh" "-c" "$HOME/.local/bin/niri-keys"; }
     Alt+Slash       hotkey-overlay-title="Built-in overlay" { show-hotkey-overlay; }
 
     // Launching
@@ -302,7 +329,7 @@ binds {
     }
     Alt+N      hotkey-overlay-title="Notifications" { spawn "swaync-client" "-t" "-sw"; }
     // Not Alt+L — that's focus-column-right. Lock is Alt+Escape.
-    Alt+Escape hotkey-overlay-title="Lock"     { spawn "lock-session"; }
+    Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/lock-session"; }
 
     Alt+Q { close-window; }
 

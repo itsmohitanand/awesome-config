@@ -44,7 +44,6 @@ link kitty/themes/everblush.conf       "$HOME/.config/kitty/themes/everblush.con
 
 # Zellij
 link zellij/config.kdl                 "$HOME/.config/zellij/config.kdl"
-link zellij/layouts/python-dev.kdl     "$HOME/.config/zellij/layouts/python-dev.kdl"
 link zellij/layouts/phd.kdl            "$HOME/.config/zellij/layouts/phd.kdl"
 link zellij/layouts/latex-thesis.kdl   "$HOME/.config/zellij/layouts/latex-thesis.kdl"
 

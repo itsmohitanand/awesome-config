@@ -204,7 +204,8 @@ awesome-config/
 └── zellij/
     ├── config.kdl           # All themes defined; theme "X" to select
     └── layouts/
-        └── python-dev.kdl
+        ├── phd.kdl
+        └── latex-thesis.kdl
 ```
 
 ## Ulauncher (GNOME fallback session only)

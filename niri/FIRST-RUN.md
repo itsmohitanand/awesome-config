@@ -36,7 +36,7 @@ the only one worth memorising.
 | Key | Action |
 | --- | ------ |
 | `Alt+Return` | terminal (kitty) |
-| `Alt+Space` | launcher (fuzzel) |
+| `Alt+Space` | launcher (noctalia) |
 | `Alt+Shift+Slash` | all keybinds, searchable |
 | `Alt+H` / `Alt+L` | focus left / right, crosses monitors |
 | `Alt+J` / `Alt+K` | focus down / up |
@@ -47,7 +47,7 @@ the only one worth memorising.
 | `Alt+O` | overview |
 | `Alt+W` | toggle floating |
 | `Alt+Q` | close window |
-| `Alt+Escape` | lock (swaylock — hyprlock isn't packaged on 24.04) |
+| `Alt+Escape` | lock (noctalia's lock screen, PAM) |
 | `Alt+Shift+E` | **quit niri** |
 | `Print` / `Alt+Print` / `Ctrl+Print` | screenshot region / window / screen |
 
@@ -79,14 +79,15 @@ Two traps:
 
 ## Verify these, in order
 
-1. **waybar** appears at the top. This is the one config that could not be
-   validated offline — waybar exits with "Bar need to run under Wayland" before
-   parsing its JSONC. If the bar is missing, run `waybar` in a terminal to see
-   the parse error. Note `waybar.service` is deliberately masked so systemd
-   doesn't start a second bar on top of the one niri spawns.
-2. **Wallpaper** crossfades in via `swww`. `switch-theme cyberdream` tests a live
-   theme swap across niri, waybar, swaync, fuzzel, GTK/Qt and wallpaper.
-3. **`Alt+N`** opens swaync.
+1. **The noctalia bar** appears at the top. If it's missing, run
+   `noctalia --daemon` in a terminal to see why — it logs to stderr and to
+   `~/.cache/noctalia/`. Note `waybar.service` is deliberately masked; Ubuntu
+   ships it globally enabled and it would start a second bar over noctalia's.
+2. **Wallpaper** crossfades in. `switch-theme cyberdream` tests a live swap
+   across noctalia, niri, kitty, GTK/Qt and the wallpaper in one go.
+3. **`Alt+N`** opens the control centre on its notifications tab, `Alt+V` the
+   clipboard, `Alt+Space` the launcher. All three are noctalia panels driven over
+   its IPC socket, so if one does nothing, the daemon isn't running.
 4. **DBeaver** launches. This is the XWayland test — see "known unknown" below.
    Thunderbird is native Wayland (`MOZ_ENABLE_WAYLAND=1` is set) and should be
    fine.
@@ -94,37 +95,40 @@ Two traps:
 
 ## Known unknown
 
-`config.kdl` points `xwayland-satellite` at `~/.cargo/bin/xwayland-satellite`
-rather than a hardcoded `/home/<user>/...`. The config **validates** and the
-binary **is** at that path, but whether niri expands `~` at spawn time is
-untested. If X11 apps (DBeaver, Slack, Discord) fail to launch, that line is the
-first suspect — replace the tilde with the literal path to confirm.
+~~Whether niri expands `~` in the `xwayland-satellite` path.~~ Resolved: it does.
+`src/utils/xwayland/satellite.rs` calls `expand_home()` on that path in both the
+spawn and the on-demand-test path, so the tilde is safe.
+
+What's actually unverified now is **noctalia**, which is beta and was swapped in
+for waybar + swaync + fuzzel + swayidle + swaylock + swww all at once. If the
+session comes up bare, everything in this repo except the bar still works — niri
+itself is unaffected — and `waybar`/`fuzzel` are still installable from apt as a
+fallback.
 
 ## What's verified
 
 - `niri validate` passes, both on the repo file and the symlinked config.
 - niri **starts**: ran nested for 15s with a minimal config, no errors. So a
   failure to reach the session is a GDM selection problem, not a niri one.
-- `bash -n` clean on all eight shell scripts; `jq` parses swaync + both ulauncher
-  configs; both wallpaper scripts compile.
+- `bash -n` clean on every shell script; `jq` parses both ulauncher configs; both
+  wallpaper scripts compile.
 - `niri-keys` parses the live config and renders all 69 binds.
-- `swww` + `swww-daemon` 0.11.2, `xwayland-satellite` present at the config path.
-- Post-install symlinks: `theme.css` (waybar + swaync), three wallpapers, and all
-  four `~/.local/bin` scripts resolve and are executable.
+- `xwayland-satellite` present at the config path.
+- Post-install symlinks: noctalia's `config.toml` and `palettes/`, three
+  wallpapers, and the `~/.local/bin` scripts resolve and are executable.
 
 ## Build gotchas already fixed in `install-deps.sh`
 
-Three apt packages were missing from the original list, each fatal rather than
-degrading:
+Packages missing from the original list, each fatal rather than degrading:
 
 | Package | Without it |
 | ------- | ---------- |
 | `libclang-dev` | `xwayland-satellite` fails — bindgen finds only versioned `libclang-NN.so.1`, not the `libclang.so` it searches for |
-| `liblz4-dev` | swww's `common/build.rs` panics on the `liblz4` pkg-config probe |
-| `wayland-protocols` | `swww-daemon` fails — probed by its `waybackend-scanner` dep, not visible in swww's own `build.rs` |
+| `libstb-dev` | noctalia's meson configure fails — it needs `stb/stb_image_resize2.h` specifically; older stb packages ship only `stb_image_resize` |
+| `libwireplumber-0.5-dev` | noctalia's meson configure fails — 0.4 is explicitly not enough |
 
-swww is also a cargo **workspace**, so both packages must be named:
-`cargo install --git https://github.com/LGFae/swww --locked swww swww-daemon`.
+noctalia needs **GCC 13+** for C++23. Ubuntu 24.04 ships 13 and 26.04 ships 15,
+so both desks build as-is; Debian 12 would need `CXX=g++-13`.
 
 ## GPU note
 

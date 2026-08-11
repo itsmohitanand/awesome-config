@@ -113,11 +113,15 @@ layout {
     // Half-width default: nvim on the left, browser on the right, both readable.
     default-column-width { proportion 0.5; }
 
+    // Colours come from noctalia.kdl (see the include at the bottom of this
+    // file), which noctalia regenerates from the active palette. Only the
+    // geometry lives here — setting active-color/inactive-color in this block
+    // would just be overridden by the include.
+    //
+    // The old two-tone gradient is gone with it: noctalia's niri template emits
+    // a flat active-color, and there's no gradient token to feed it.
     focus-ring {
         width 2
-        // switch-theme rewrites these two lines — keep them on one line each.
-        active-gradient from="#6cbfbf" to="#67b0e8" angle=45 relative-to="workspace-view"
-        inactive-color "#2d3437"
     }
 
     border {
@@ -145,27 +149,25 @@ layout {
 
 spawn-at-startup "/usr/libexec/xdg-desktop-portal-gnome"
 
-// Ubuntu's waybar package ships a globally-enabled waybar.service that is
-// WantedBy=graphical-session.target, which niri.service joins — so it would
-// start a SECOND bar alongside this one. It's masked for this user:
-//     systemctl --user mask waybar.service
-// install.sh does this for you. Undo with `systemctl --user unmask waybar.service`
-// if you'd rather let systemd own the bar than this config.
-spawn-at-startup "waybar"
-spawn-at-startup "swaync"
+// noctalia — bar, launcher, notifications, clipboard, lock, idle and wallpaper
+// in one process. It replaced waybar + swaync + fuzzel + swayidle + swww, so
+// there is exactly one thing to start here and one config to theme.
+//
+// Ubuntu's waybar package still ships a globally-enabled waybar.service that is
+// WantedBy=graphical-session.target, which niri.service joins. waybar isn't
+// spawned here any more, but systemd would still start it on top of noctalia's
+// bar — so install.sh keeps it masked. Undo with
+//     systemctl --user unmask waybar.service
+// only if you go back to waybar.
+//
+// --daemon is the documented startup mode; noctalia ships no systemd unit.
+// Idle timeouts, lock and wallpaper all live in noctalia/config.toml now, which
+// is why the swayidle and set-wallpaper lines are gone.
+spawn-at-startup "sh" "-c" "$HOME/.local/bin/noctalia --daemon"
+
 // Copenhagen. At 55.7°N the summer/winter daylight swing is extreme, so let
 // wlsunset compute from coordinates rather than pinning fixed times.
 spawn-at-startup "wlsunset" "-l" "55.68" "-L" "12.57"
-spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
-
-// Idle: dim-free, just lock at 10min, screens off at 12min, lock before suspend.
-// The -w on before-sleep makes the lock finish before the machine suspends.
-spawn-at-startup "swayidle" "-w" \
-    "timeout" "600" "lock-session" \
-    "timeout" "720" "niri msg action power-off-monitors" \
-    "resume" "niri msg action power-on-monitors" \
-    "before-sleep" "$HOME/.local/bin/lock-session"
-spawn-at-startup "sh" "-c" "$HOME/.local/bin/set-wallpaper"
 
 // XWayland for X11 apps (Slack, Discord, older GTK). niri 26.04 manages the
 // satellite process itself — don't spawn it manually and don't set DISPLAY,
@@ -298,8 +300,10 @@ window-rule {
 }
 
 layer-rule {
-    match namespace="^waybar$"
-    // Bar sits above the shadow layer without gaining a shadow of its own.
+    // noctalia puts every layer surface it owns — bar, panels, OSD, lock — under
+    // the one "noctalia" namespace, so this covers the lot. It draws its own
+    // shadow from [shell.shadow], hence no compositor shadow on top.
+    match namespace="^noctalia$"
     shadow { off; }
 }
 
@@ -316,7 +320,9 @@ binds {
 
     // Launching
     Alt+Return hotkey-overlay-title="Terminal" { spawn "kitty"; }
-    Alt+Space  hotkey-overlay-title="Launcher" { spawn "fuzzel"; }
+    // noctalia panels are driven over its IPC socket. `sh -c` because these go
+    // through $HOME — see the environment block above for why there's no PATH.
+    Alt+Space  hotkey-overlay-title="Launcher" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle launcher"; }
     // Not Alt+B — that's readline backward-word, which is worth keeping.
     Alt+Shift+B hotkey-overlay-title="Browser" { spawn "firefox"; }
     Alt+E      hotkey-overlay-title="Files"    { spawn "kitty" "-e" "yazi"; }
@@ -326,12 +332,20 @@ binds {
     Alt+Shift+C hotkey-overlay-title="Calculator" {
         spawn "sh" "-c" "command -v qalculate-gtk >/dev/null && exec qalculate-gtk || exec gnome-calculator";
     }
+    // noctalia keeps its own clipboard history, so no wl-paste/cliphist pipeline
+    // to spawn at startup and no dmenu round-trip here.
     Alt+V      hotkey-overlay-title="Clipboard history" {
-        spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy";
+        spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle clipboard";
     }
-    Alt+N      hotkey-overlay-title="Notifications" { spawn "swaync-client" "-t" "-sw"; }
+    // Notifications live in the control centre panel rather than a panel of
+    // their own; the second word is the tab to open it on.
+    Alt+N      hotkey-overlay-title="Notifications" {
+        spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle control-center notifications";
+    }
     // Not Alt+L — that's focus-column-right. Lock is Alt+Escape.
-    Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/lock-session"; }
+    // noctalia's lock screen authenticates through PAM; lock.sh and
+    // hyprlock/swaylock are gone.
+    Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg session lock"; }
 
     Alt+Q { close-window; }
 
@@ -446,3 +460,14 @@ binds {
     Alt+Shift+E { quit; }
     Alt+Shift+P { power-off-monitors; }
 }
+
+// ─── Theme ──────────────────────────────────────────────────────────────────
+// noctalia regenerates ~/.config/niri/noctalia.kdl from the active palette
+// whenever the theme changes, and niri hot-reloads on the write. It holds the
+// focus-ring, border, shadow, tab-indicator and insert-hint colours.
+//
+// The file is NOT tracked in this repo — it's generated output, and niri treats
+// a missing include as a fatal config error rather than skipping it, so
+// install.sh seeds one before you ever log in. Don't edit it; edits are lost on
+// the next theme switch.
+include "noctalia.kdl"

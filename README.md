@@ -8,9 +8,7 @@ session on Ubuntu, with kitty, zellij, starship and neovim inside it.
 | Tool | Purpose |
 |------|---------|
 | [niri](https://github.com/YaLTeR/niri) | Scrollable-tiling Wayland compositor |
-| [waybar](https://github.com/Alexays/Waybar) | Top panel |
-| [fuzzel](https://codeberg.org/dnkl/fuzzel) | Application launcher (`Alt+Space`) |
-| [swaync](https://github.com/ErikReider/SwayNotificationCenter) | Notifications + control centre (`Alt+N`) |
+| [noctalia](https://github.com/noctalia-dev/noctalia-shell) | Desktop shell: bar, launcher (`Alt+Space`), notifications, control centre (`Alt+N`), clipboard (`Alt+V`), lock, idle, wallpaper |
 | [kitty](https://sw.kovidgoyal.net/kitty/) | GPU-accelerated terminal emulator |
 | [starship](https://starship.rs/) | Cross-shell prompt |
 | [zellij](https://zellij.dev/) | Terminal multiplexer |
@@ -40,10 +38,14 @@ documents and avoids adding an unaudited apt source. If you'd rather have a
 packaged binary, `./niri/install-deps.sh --ppa` pulls from
 `ppa:avengemedia/danklinux` — a community PPA, so decide for yourself.
 
-Two things are genuinely optional and not packaged for Ubuntu:
+Two things are not packaged for Ubuntu and are built from source by
+`install-deps.sh`:
 
-- **`swww`** (`cargo install swww`) — animated wallpaper crossfades.
-  `set-wallpaper` falls back to `swaybg` without it.
+- **`noctalia`** — the entire desktop shell. Not optional: without it there is no
+  bar, launcher, notifications or lock screen. v5 is a native C++23 meson build
+  (no Qt, no Quickshell — that was v4), needs GCC 13+, and installs to
+  `~/.local`. It tracks `main` because v5 is still beta and upstream only
+  supports the latest version.
 - **`xwayland-satellite`** — needed for X11 apps (Slack, Discord). niri only
   spawns it if it's on `PATH`.
 
@@ -94,16 +96,24 @@ switch-theme cyberdream
 
 | Surface | How theme is applied |
 |---------|---------------------|
-| kitty | `include themes/<name>.conf` in `kitty.conf` — reload with `ctrl+shift+F5` |
+| noctalia | `noctalia msg color-scheme-set custom <name>` — live |
+| kitty | noctalia template → `themes/noctalia.conf`, running instances signalled — live |
+| niri | noctalia template → `~/.config/niri/noctalia.kdl`, hot-reloaded — live |
+| GTK / Qt | noctalia templates for the palette, `gsettings` for theme/cursor/fonts |
+| wallpaper | `noctalia msg wallpaper-set` — live, with a crossfade |
 | starship | `palette = '<name>'` in `starship.toml` — takes effect in new shells |
 | zellij | `theme "<name>"` in `config.kdl` — requires session restart |
 | neovim | `local theme = '<name>'` in `init.lua` — restart or `:source` |
-| niri | focus-ring gradient rewritten in `config.kdl` — live |
-| waybar | `~/.config/waybar/theme.css` symlink repointed — live (`SIGUSR2`) |
-| swaync | `~/.config/swaync/theme.css` symlink repointed — live |
-| fuzzel | `[colors]` block between the `THEME:START/END` markers — live |
-| GTK / Qt | `gsettings` colour-scheme, theme, cursor and fonts |
-| wallpaper | `~/.config/wallpapers/<name>.png` via `swww`, else `swaybg` |
+
+Everything above the line is driven by one palette file,
+`noctalia/palettes/<name>.json`, generated from `kitty/themes/<name>.conf` by
+`noctalia/make-palette.py`. kitty keeps the ANSI 16 because it's the one format
+that names all of them explicitly; noctalia reproduces it exactly.
+
+starship has an upstream template too, but it isn't enabled: it rewrites
+`~/.config/starship.toml`, which is a symlink into this repo, so every switch
+would leave the repo dirty. Same reason nvim and zellij stay hand-rolled — no
+template exists for either.
 
 The active theme is recorded in `~/.config/current-theme`.
 
@@ -127,33 +137,34 @@ it up on the next `switch-theme`, no re-install:
 grain. Seconds instead of a minute, no numpy.
 
 Output is 3840x2160 by default, which downscales cleanly onto any 16:9 panel.
-`swww` crop-to-fills, though, so a screen of a different aspect — a rotated
-portrait panel especially — gets a slice of the middle rather than the whole
-attractor. Render at that panel's own resolution instead:
+noctalia crop-to-fills (`fill_mode = "crop"`), though, so a screen of a different
+aspect — a rotated portrait panel especially — gets a slice of the middle rather
+than the whole attractor. Render at that panel's own resolution instead:
 
 ```bash
 ./niri/make-wallpaper-chaos.py everblush wall.png --size 1440x2560 --zoom 0.95
 ```
 
 `--zoom` <1 crops into the filaments, `--offset` shifts it clear of where you
-keep windows. Applying different images per output needs `swww img --outputs`;
-`set-wallpaper` sets one image for all of them.
+keep windows. Per-output images need `noctalia msg wallpaper-set <connector>
+<path>`; `switch-theme` sets one image for all of them.
 
-Waybar and swaync share one palette file (`themes/<name>.css`) because both use
-GTK CSS — the `@define-color` names are the single source of truth for the
-desktop chrome. `switch-theme.sh` carries a matching palette table for the
-surfaces that can't `@import`.
+Rendered files go in `niri/wallpapers/`, symlinked to `~/.config/wallpapers/`,
+which is what noctalia's `[wallpaper] directory` points at — so they also show up
+in its wallpaper picker and the launcher's wallpaper provider.
 
 ### Adding a new theme
 
-1. Add `kitty/themes/<name>.conf` with color definitions
-2. Add `themes/<name>.css` with the ten `@define-color` names
-3. Add a matching `<name>)` case to the palette table in `switch-theme.sh`
-4. Add a `[palettes.<name>]` block to `starship/starship.toml`
-5. Add a `<name> { ... }` block inside `themes {}` in `zellij/config.kdl`
-6. Ensure the neovim colorscheme plugin for `<name>` is in `init.lua`
-7. Optionally drop `~/.config/wallpapers/<name>.png`
-8. Run `switch-theme <name>`
+1. Add `kitty/themes/<name>.conf` with the full ANSI 16 plus fg/bg/cursor/selection
+2. Add a `<name>` entry to `ACCENTS` in `noctalia/make-palette.py` — four values
+   kitty has no slot for (accent, accent2, dim, bg_alt)
+3. Run `./noctalia/make-palette.py <name>` to generate the palette JSON
+4. Add the name to the `case` in `switch-theme.sh`
+5. Add a `[palettes.<name>]` block to `starship/starship.toml`
+6. Add a `<name> { ... }` block inside `themes {}` in `zellij/config.kdl`
+7. Ensure the neovim colorscheme plugin for `<name>` is in `init.lua`
+8. Optionally render `niri/wallpapers/<name>.png`
+9. Run `switch-theme <name>`
 
 ## Structure
 
@@ -162,25 +173,18 @@ awesome-config/
 ├── install.sh              # Symlinks everything into ~/.config/
 ├── switch-theme.sh         # Switches active theme across all surfaces
 ├── .modern_shell_config    # Shared aliases and functions (bash + zsh)
-├── themes/                 # Shared GTK palettes (waybar + swaync)
-│   ├── poimandres.css
-│   ├── cyberdream.css
-│   └── everblush.css
+├── noctalia/
+│   ├── config.toml         # → ~/.config/noctalia/config.toml
+│   ├── make-palette.py     # kitty theme → noctalia palette JSON
+│   └── palettes/           # → ~/.config/noctalia/palettes/
+│       └── <theme>.json    # M3 roles + ANSI 16, generated
 ├── niri/
 │   ├── config.kdl          # → ~/.config/niri/config.kdl
-│   ├── install-deps.sh     # apt packages + niri build (not symlinked)
-│   ├── set-wallpaper.sh    # → ~/.local/bin/set-wallpaper
+│   ├── keys.sh             # → ~/.local/bin/niri-keys
+│   ├── install-deps.sh     # apt packages + niri and noctalia builds
 │   ├── make-wallpaper-chaos.py  # strange-attractor renderer (numpy + pillow)
 │   └── wallpapers/         # pre-rendered 4K, one per theme
 │       └── <theme>.png     # → ~/.config/wallpapers/<theme>.png
-├── waybar/
-│   ├── config.jsonc        # → ~/.config/waybar/config.jsonc
-│   └── style.css           # → ~/.config/waybar/style.css
-├── fuzzel/
-│   └── fuzzel.ini          # → ~/.config/fuzzel/fuzzel.ini
-├── swaync/
-│   ├── config.json         # → ~/.config/swaync/config.json
-│   └── style.css           # → ~/.config/swaync/style.css
 ├── kitty/
 │   ├── kitty.conf
 │   └── themes/
@@ -209,7 +213,7 @@ awesome-config/
 
 ## Ulauncher (GNOME fallback session only)
 
-Under niri the launcher is **fuzzel**, bound to `Alt+Space` in
+Under niri the launcher is **noctalia's**, bound to `Alt+Space` in
 `niri/config.kdl`. Ulauncher is kept for the GNOME session that remains
 installed as a fallback.
 

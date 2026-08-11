@@ -1,0 +1,117 @@
+# noctalia — bar, launcher, notifications, clipboard, lock, idle and wallpaper.
+# → ~/.config/noctalia/config.toml (symlinked by install.sh)
+#
+# Replaces waybar + swaync + fuzzel + swayidle + hyprlock/swaylock + swww. It
+# claims org.freedesktop.Notifications and org.kde.StatusNotifierWatcher, so it
+# cannot run alongside any of those — install.sh keeps waybar.service masked for
+# exactly that reason.
+#
+# Only settings that differ from the shipped defaults are listed. `noctalia
+# --dump-config` (or example.toml in the source tree) has the full set.
+#
+# TWO FILES, not one. This is the declarative config. Anything changed through
+# the settings GUI or `noctalia msg` is written to
+# ~/.local/state/noctalia/settings.toml instead, and that file WINS over this
+# one. So [theme] below is the first-boot default: after the first
+# `switch-theme`, the palette comes from settings.toml. Delete that file to fall
+# back to what's here.
+#
+# Most keys hot-reload via inotify; the ones that don't are marked startup-only
+# in the upstream example.toml.
+
+[shell]
+font_family   = "Inter"
+clipboard_enabled = true
+polkit_agent  = true              # replaces the GNOME agent under a niri session
+
+# ── Theme ─────────────────────────────────────────────────────────────────────
+# Palettes come from noctalia/palettes/<name>.json in this repo, symlinked to
+# ~/.config/noctalia/palettes/. They are generated from kitty/themes/<name>.conf
+# by noctalia/make-palette.py — kitty stays the source of truth for the ANSI 16.
+#
+# Templates push this palette back out to the apps noctalia doesn't own. Three
+# surfaces are deliberately NOT in builtin_ids:
+#   nvim, zellij  — no template exists upstream
+#   starship      — one exists, but it rewrites ~/.config/starship.toml, and that
+#                   is a symlink into this repo. Enabling it would replace the
+#                   tracked `palette = '<theme>'` with a generated block on every
+#                   switch and leave the repo permanently dirty. starship.toml
+#                   already defines all three palettes, so switch-theme.sh just
+#                   flips the one line.
+# switch-theme.sh handles those three.
+#
+# The kitty template does touch the repo, but only once: it appends
+# `include themes/noctalia.conf` to kitty.conf if absent (writing through the
+# symlink, not replacing it). That line is committed, so it's a no-op here.
+
+[theme]
+mode           = "dark"
+source         = "custom"
+custom_palette = "everblush"
+
+[theme.templates]
+enable_builtin_templates   = true
+builtin_ids                = ["niri", "kitty", "gtk3", "gtk4", "qt", "btop"]
+enable_community_templates = false
+
+# ── Bar ───────────────────────────────────────────────────────────────────────
+# Widget order mirrors the waybar config this replaces: workspaces left, clock
+# centre, tray/network/volume/battery right. `notifications` and `control-center`
+# together cover what swaync's panel did.
+
+[bar.main]
+position       = "top"
+thickness      = 34
+radius         = 12
+margin_ends    = 180
+margin_edge    = 10
+reserve_space  = true
+
+start  = ["launcher", "workspaces", "active-window"]
+center = ["clock"]
+end    = ["media", "tray", "notifications", "clipboard", "network", "volume", "brightness", "battery", "control-center", "session"]
+
+# ── Launcher ──────────────────────────────────────────────────────────────────
+# Alt+Space, same bind fuzzel had. `provider_prefix` "/" gives /calc, /emo etc.
+
+[shell.launcher]
+categories    = true
+sort_by_usage = true
+
+# ── Notifications ─────────────────────────────────────────────────────────────
+
+[notification]
+enable_daemon = true               # NOT `enabled` — noctalia rejects that as an unknown setting
+
+# ── Idle and lock ─────────────────────────────────────────────────────────────
+# Same timings the swayidle line used: lock at 10 minutes, monitors off two
+# minutes later. Noctalia's own lock screen authenticates through PAM, so
+# hyprlock/swaylock and lock.sh are both gone.
+
+[idle.behavior.lock]
+enabled = true
+timeout = 600
+action  = "lock"
+
+[idle.behavior.screen-off]
+enabled = true
+timeout = 720
+action  = "screen_off"
+
+# ── Wallpaper ─────────────────────────────────────────────────────────────────
+# Replaces swww and set-wallpaper.sh. ~/.config/wallpapers is where install.sh
+# symlinks the per-theme renders from niri/wallpapers/, so the picker and the
+# `wallpaper` launcher provider both see them.
+#
+# Nothing here switches the wallpaper with the theme — noctalia has no such hook.
+# switch-theme.sh calls `noctalia msg wallpaper-set` to keep the two in step.
+
+[wallpaper]
+enabled             = true
+directory           = "~/.config/wallpapers"
+fill_mode           = "crop"
+transition          = ["fade", "wipe", "disc", "zoom"]
+transition_duration = 1200
+
+[wallpaper.automation]
+enabled = false

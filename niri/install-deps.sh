@@ -24,14 +24,7 @@ esac
 echo "==> Installing desktop packages from apt"
 sudo apt update
 sudo apt install -y \
-    waybar \
-    fuzzel \
-    sway-notification-center \
-    swaybg \
-    swaylock \
-    swayidle \
     wl-clipboard \
-    cliphist \
     wlsunset \
     playerctl \
     brightnessctl \
@@ -52,16 +45,37 @@ sudo apt install -y \
     wayland-protocols \
     meson \
     ninja-build \
-    scdoc \
-    libfcft-dev \
-    libtllist-dev \
-    libpixman-1-dev \
-    libpng-dev
-
-# hyprlock is a nicer lock screen than swaylock and is packaged on 26.04.
-if apt-cache policy hyprlock 2>/dev/null | grep -q Candidate:\ [0-9]; then
-    sudo apt install -y hyprlock
-fi
+    just \
+    libegl-dev \
+    libgles-dev \
+    libfreetype-dev \
+    libfontconfig-dev \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libharfbuzz-dev \
+    libxkbcommon-dev \
+    libglib2.0-dev \
+    libsecret-1-dev \
+    libsodium-dev \
+    libsdbus-c++-dev \
+    libpipewire-0.3-dev \
+    libwireplumber-0.5-dev \
+    libpam0g-dev \
+    libpolkit-agent-1-dev \
+    libpolkit-gobject-1-dev \
+    libcurl4-openssl-dev \
+    libwebp-dev \
+    libjxl-dev \
+    libsndfile1-dev \
+    librsvg2-dev \
+    libqalculate-dev \
+    libxml2-dev \
+    libmd4c-dev \
+    libtomlplusplus-dev \
+    libical-dev \
+    nlohmann-json3-dev \
+    libstb-dev \
+    libjemalloc-dev
 
 echo
 echo "==> Cargo-installed extras (not packaged for Ubuntu)"
@@ -80,25 +94,6 @@ else
             || echo "    WARNING: xwayland-satellite failed to build; X11 apps won't run" >&2
     fi
 
-    # swww: animated wallpaper transitions. Not published to crates.io — it only
-    # ships from git, so `cargo install swww` fails with "not found in registry".
-    # It's also a workspace (client + daemon), so both packages must be named or
-    # cargo refuses with "multiple packages with binaries found". set-wallpaper
-    # needs both: swww-daemon to run, swww to talk to it.
-    # System deps, all in the apt list above, all fatal if absent rather than
-    # degrading: liblz4-dev (common/build.rs probes liblz4) and wayland-protocols
-    # (the waybackend-scanner dep probes it for pkgdatadir — not visible in swww's
-    # own build.rs, so grepping the workspace won't find it). libwayland-dev
-    # covers scanner's other two probes, wayland-client and wayland-scanner.
-    # set-wallpaper falls back to swaybg if this doesn't build.
-    if command -v swww >/dev/null && command -v swww-daemon >/dev/null; then
-        echo "    swww — already installed"
-    else
-        echo "    swww — installing (animated wallpaper transitions)"
-        cargo install --git https://github.com/LGFae/swww --locked swww swww-daemon \
-            || echo "    WARNING: swww failed to build; set-wallpaper will use swaybg" >&2
-    fi
-
     # yazi: terminal file manager, bound to Alt+E in niri/config.kdl. Not in the
     # Ubuntu archive. Must go through the `yazi-build` helper crate — installing
     # yazi-fm/yazi-cli directly makes their build.rs abort telling you so.
@@ -113,39 +108,49 @@ else
     fi
 fi
 
-# ── fuzzel from source ──────────────────────────────────────────────────────
-# fuzzel/fuzzel.ini needs >= 1.11 for anchor, y-margin, the [colors] entries
-# prompt/placeholder/input/counter, and delete-line-forward. Ubuntu 24.04 ships
-# 1.9.2, and fuzzel ABORTS on the first unknown key rather than warning — so the
-# apt build leaves you with no launcher at all (Alt+Space, Alt+V, Alt+Shift+E).
+# ── noctalia from source ────────────────────────────────────────────────────
+# The whole desktop shell: bar, launcher, notifications, clipboard, lock screen,
+# idle handling, OSD and wallpaper. Replaces waybar + swaync + fuzzel + swayidle
+# + swaylock + swww, which is why none of those are in the apt list any more.
 #
-# Pinned to 1.12.0 deliberately: 1.13 bumped pixman to >= 0.46 and 24.04 has
-# 0.42, which would drag in a pixman source build. 1.12.0 needs only apt.
+# Not packaged for Ubuntu (as of 26.04), so it's a source build. v5 is native
+# C++23 with meson — no Qt, no Quickshell, unlike the v4 many guides describe.
+# Needs GCC 13+; 26.04 ships 15 and 24.04 ships 13, so both desks are fine.
 #
-# Installs to ~/.local/bin, shadowing /usr/bin/fuzzel without removing it, so
-# apt's copy stays as a fallback. niri inherits ~/.local/bin on PATH, so binds
-# that spawn plain `fuzzel` pick this up.
-FUZZEL_MIN_MINOR=11
-fuzzel_minor="$(fuzzel --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 | cut -d. -f2)"
-if [[ -n "$fuzzel_minor" ]] && (( fuzzel_minor >= FUZZEL_MIN_MINOR )); then
-    echo
-    echo "==> fuzzel $(fuzzel --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1) already new enough"
+# Tracks main deliberately: v5 is beta and upstream only supports the latest
+# version. Pin a tag here instead if a bad day makes that a poor trade.
+#
+# Installs to ~/.local, no sudo. niri inherits ~/.local/bin on PATH.
+echo
+echo "==> Building noctalia (desktop shell) from source"
+NOC_SRC="${XDG_CACHE_HOME:-$HOME/.cache}/noctalia-src"
+if [[ -d "$NOC_SRC/.git" ]]; then
+    git -C "$NOC_SRC" fetch --prune && git -C "$NOC_SRC" reset --hard origin/main
 else
-    echo
-    echo "==> Building fuzzel 1.12.0 (apt's 1.9.2 is too old for fuzzel.ini)"
-    FZ_SRC="${XDG_CACHE_HOME:-$HOME/.cache}/fuzzel-src"
-    if [[ -d "$FZ_SRC/.git" ]]; then
-        git -C "$FZ_SRC" fetch --tags --prune
-    else
-        rm -rf "$FZ_SRC"
-        git clone https://codeberg.org/dnkl/fuzzel.git "$FZ_SRC"
-    fi
-    git -C "$FZ_SRC" checkout --quiet 1.12.0
-    rm -rf "$FZ_SRC/build"
-    meson setup "$FZ_SRC/build" "$FZ_SRC" --prefix="$HOME/.local" --buildtype=release \
-        && ninja -C "$FZ_SRC/build" \
-        && ninja -C "$FZ_SRC/build" install \
-        || echo "    WARNING: fuzzel build failed; apt's 1.9.2 will reject fuzzel.ini" >&2
+    rm -rf "$NOC_SRC"
+    git clone https://github.com/noctalia-dev/noctalia-shell.git "$NOC_SRC"
+fi
+# --buildtype=release, not -Dnative_optimizations: the office box and this one
+# share a cache dir layout but not a CPU, and native codegen isn't portable.
+# --wipe reconfigures an existing build dir; it errors out if there isn't one.
+noc_setup=(meson setup "$NOC_SRC/build-release" "$NOC_SRC"
+           --prefix="$HOME/.local" --buildtype=release -Dtests=disabled)
+[[ -d "$NOC_SRC/build-release" ]] && noc_setup+=(--wipe)
+if "${noc_setup[@]}"; then
+    ninja -C "$NOC_SRC/build-release" \
+        && ninja -C "$NOC_SRC/build-release" install \
+        && echo "    noctalia $("$HOME/.local/bin/noctalia" --version 2>/dev/null | head -1)" \
+        || echo "    WARNING: noctalia build failed; you'll have no bar or launcher" >&2
+else
+    echo "    WARNING: noctalia meson setup failed; check the dep list above" >&2
+fi
+
+# Shell completions aren't installed by meson — upstream leaves that to the
+# packager because running the freshly built binary breaks cross-compilation.
+if [[ -x "$HOME/.local/bin/noctalia" ]]; then
+    mkdir -p "$HOME/.local/share/zsh/site-functions" "$HOME/.local/share/bash-completion/completions"
+    "$HOME/.local/bin/noctalia" completions zsh  > "$HOME/.local/share/zsh/site-functions/_noctalia" 2>/dev/null || true
+    "$HOME/.local/bin/noctalia" completions bash > "$HOME/.local/share/bash-completion/completions/noctalia" 2>/dev/null || true
 fi
 
 case "$MODE" in

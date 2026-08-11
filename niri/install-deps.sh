@@ -46,7 +46,17 @@ sudo apt install -y \
     yaru-theme-icon \
     xwayland \
     libxcb-cursor-dev \
-    libxcb1-dev
+    libxcb1-dev \
+    libclang-dev \
+    liblz4-dev \
+    wayland-protocols \
+    meson \
+    ninja-build \
+    scdoc \
+    libfcft-dev \
+    libtllist-dev \
+    libpixman-1-dev \
+    libpng-dev
 
 # hyprlock is a nicer lock screen than swaylock and is packaged on 26.04.
 if apt-cache policy hyprlock 2>/dev/null | grep -q Candidate:\ [0-9]; then
@@ -58,8 +68,10 @@ echo "==> Cargo-installed extras (not packaged for Ubuntu)"
 if ! command -v cargo >/dev/null; then
     echo "    cargo not found — skipping. Install rustup, then re-run."
 else
-    # xwayland-satellite: X11 apps (Slack, Discord). niri 26.04 manages the
-    # process itself; niri/config.kdl points at ~/.cargo/bin/xwayland-satellite.
+    # xwayland-satellite: X11 apps (Slack, Discord, DBeaver). niri 26.04 manages
+    # the process itself; niri/config.kdl points at ~/.cargo/bin/xwayland-satellite.
+    # Needs libclang-dev (above) — it builds bindgen, and `clang` alone ships only
+    # versioned libclang-NN.so.1, not the libclang.so that bindgen's search wants.
     if command -v xwayland-satellite >/dev/null; then
         echo "    xwayland-satellite — already installed"
     else
@@ -70,14 +82,70 @@ else
 
     # swww: animated wallpaper transitions. Not published to crates.io — it only
     # ships from git, so `cargo install swww` fails with "not found in registry".
+    # It's also a workspace (client + daemon), so both packages must be named or
+    # cargo refuses with "multiple packages with binaries found". set-wallpaper
+    # needs both: swww-daemon to run, swww to talk to it.
+    # System deps, all in the apt list above, all fatal if absent rather than
+    # degrading: liblz4-dev (common/build.rs probes liblz4) and wayland-protocols
+    # (the waybackend-scanner dep probes it for pkgdatadir — not visible in swww's
+    # own build.rs, so grepping the workspace won't find it). libwayland-dev
+    # covers scanner's other two probes, wayland-client and wayland-scanner.
     # set-wallpaper falls back to swaybg if this doesn't build.
-    if command -v swww >/dev/null; then
+    if command -v swww >/dev/null && command -v swww-daemon >/dev/null; then
         echo "    swww — already installed"
     else
         echo "    swww — installing (animated wallpaper transitions)"
-        cargo install --git https://github.com/LGFae/swww --locked \
+        cargo install --git https://github.com/LGFae/swww --locked swww swww-daemon \
             || echo "    WARNING: swww failed to build; set-wallpaper will use swaybg" >&2
     fi
+
+    # yazi: terminal file manager, bound to Alt+E in niri/config.kdl. Not in the
+    # Ubuntu archive. Must go through the `yazi-build` helper crate — installing
+    # yazi-fm/yazi-cli directly makes their build.rs abort telling you so.
+    # Needs a recent rustc (26.5 wants >= 1.95); `rustup update` if it complains,
+    # since cargo won't silently fall back to an older yazi.
+    if command -v yazi >/dev/null; then
+        echo "    yazi — already installed"
+    else
+        echo "    yazi — installing (file manager, Alt+E)"
+        cargo install --force yazi-build \
+            || echo "    WARNING: yazi failed to build; Alt+E won't open a file manager" >&2
+    fi
+fi
+
+# ── fuzzel from source ──────────────────────────────────────────────────────
+# fuzzel/fuzzel.ini needs >= 1.11 for anchor, y-margin, the [colors] entries
+# prompt/placeholder/input/counter, and delete-line-forward. Ubuntu 24.04 ships
+# 1.9.2, and fuzzel ABORTS on the first unknown key rather than warning — so the
+# apt build leaves you with no launcher at all (Alt+Space, Alt+V, Alt+Shift+E).
+#
+# Pinned to 1.12.0 deliberately: 1.13 bumped pixman to >= 0.46 and 24.04 has
+# 0.42, which would drag in a pixman source build. 1.12.0 needs only apt.
+#
+# Installs to ~/.local/bin, shadowing /usr/bin/fuzzel without removing it, so
+# apt's copy stays as a fallback. niri inherits ~/.local/bin on PATH, so binds
+# that spawn plain `fuzzel` pick this up.
+FUZZEL_MIN_MINOR=11
+fuzzel_minor="$(fuzzel --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 | cut -d. -f2)"
+if [[ -n "$fuzzel_minor" ]] && (( fuzzel_minor >= FUZZEL_MIN_MINOR )); then
+    echo
+    echo "==> fuzzel $(fuzzel --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1) already new enough"
+else
+    echo
+    echo "==> Building fuzzel 1.12.0 (apt's 1.9.2 is too old for fuzzel.ini)"
+    FZ_SRC="${XDG_CACHE_HOME:-$HOME/.cache}/fuzzel-src"
+    if [[ -d "$FZ_SRC/.git" ]]; then
+        git -C "$FZ_SRC" fetch --tags --prune
+    else
+        rm -rf "$FZ_SRC"
+        git clone https://codeberg.org/dnkl/fuzzel.git "$FZ_SRC"
+    fi
+    git -C "$FZ_SRC" checkout --quiet 1.12.0
+    rm -rf "$FZ_SRC/build"
+    meson setup "$FZ_SRC/build" "$FZ_SRC" --prefix="$HOME/.local" --buildtype=release \
+        && ninja -C "$FZ_SRC/build" \
+        && ninja -C "$FZ_SRC/build" install \
+        || echo "    WARNING: fuzzel build failed; apt's 1.9.2 will reject fuzzel.ini" >&2
 fi
 
 case "$MODE" in

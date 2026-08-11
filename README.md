@@ -9,8 +9,8 @@ session on Ubuntu, with kitty, zellij, starship and neovim inside it.
 |------|---------|
 | [niri](https://github.com/YaLTeR/niri) | Scrollable-tiling Wayland compositor |
 | [waybar](https://github.com/Alexays/Waybar) | Top panel |
-| [fuzzel](https://codeberg.org/dnkl/fuzzel) | Application launcher (`Super+Space`) |
-| [swaync](https://github.com/ErikReider/SwayNotificationCenter) | Notifications + control centre (`Super+N`) |
+| [fuzzel](https://codeberg.org/dnkl/fuzzel) | Application launcher (`Alt+Space`) |
+| [swaync](https://github.com/ErikReider/SwayNotificationCenter) | Notifications + control centre (`Alt+N`) |
 | [kitty](https://sw.kovidgoyal.net/kitty/) | GPU-accelerated terminal emulator |
 | [starship](https://starship.rs/) | Cross-shell prompt |
 | [zellij](https://zellij.dev/) | Terminal multiplexer |
@@ -62,11 +62,18 @@ the compositor to do it every frame:
 magick wallpaper.png -blur 0x24 -modulate 92 ~/.config/wallpapers/everblush.png
 ```
 
-**Keybind policy:** every niri binding is `Super`-based. Nothing binds a bare
+**Keybind policy:** every niri binding is `Alt`-based — `Super` sits on a
+home-row mod on the ZSA Voyager and is awkward to hold. Nothing binds a bare
 `Ctrl+key`, so zellij's `Ctrl+G/P/T/N/H/S/O/Q` keep working inside any terminal.
 Don't add plain-Ctrl bindings to `niri/config.kdl`.
 
-Press `Super+Shift+/` for the full keybind overlay.
+The cost of `Alt`: the compositor swallows `Alt+key` before the terminal sees it,
+which breaks readline word operations. Binds avoid the ones worth keeping —
+hence `Alt+Shift+B` for the browser rather than `Alt+B`.
+
+Press `Alt+Shift+/` for the full keybind list (`niri-keys`, which parses the
+config so it shows everything). `Alt+/` is niri's own built-in overlay, which
+only shows a curated subset.
 
 Add to your `~/.zshrc` or `~/.bashrc`:
 
@@ -202,7 +209,7 @@ awesome-config/
 
 ## Ulauncher (GNOME fallback session only)
 
-Under niri the launcher is **fuzzel**, bound to `Super+Space` in
+Under niri the launcher is **fuzzel**, bound to `Alt+Space` in
 `niri/config.kdl`. Ulauncher is kept for the GNOME session that remains
 installed as a fallback.
 

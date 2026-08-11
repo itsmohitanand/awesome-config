@@ -300,10 +300,11 @@ window-rule {
 }
 
 layer-rule {
-    // noctalia puts every layer surface it owns — bar, panels, OSD, lock — under
-    // the one "noctalia" namespace, so this covers the lot. It draws its own
-    // shadow from [shell.shadow], hence no compositor shadow on top.
-    match namespace="^noctalia$"
+    // Prefix match, not ^noctalia$: the surfaces are named per role —
+    // noctalia-bar-main, noctalia-wallpaper, and so on (check with
+    // `niri msg layers`). An anchored exact match silently matches nothing.
+    // noctalia draws its own shadow from [shell.shadow], so no compositor one.
+    match namespace="^noctalia-"
     shadow { off; }
 }
 

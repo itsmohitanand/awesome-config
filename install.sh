@@ -125,17 +125,25 @@ if ! command -v niri >/dev/null; then
         || echo "  skipped: run ./niri/install-deps.sh when you want the niri session"
 fi
 
-# Ubuntu ships waybar.service globally enabled and WantedBy=graphical-session
-# .target, which niri.service joins — so systemd starts a bar even though nothing
-# in this repo spawns waybar any more. noctalia's bar would end up underneath a
-# stray waybar. Mask it. install-deps.sh no longer installs waybar at all, so on
-# a fresh machine this is a no-op; it matters on boxes that had the old stack.
-if systemctl --user list-unit-files waybar.service >/dev/null 2>&1; then
-    if [[ "$(systemctl --user is-enabled waybar.service 2>/dev/null)" != "masked" ]]; then
-        systemctl --user mask waybar.service >/dev/null 2>&1 \
-            && echo "  mask: waybar.service (prevents a duplicate top bar)"
+# Ubuntu ships waybar.service AND swaync.service globally enabled and
+# WantedBy=graphical-session.target, which niri.service joins — so systemd starts
+# both even though nothing in this repo spawns them any more. A stray waybar
+# lands on top of noctalia's bar, and a stray swaync grabs
+# org.freedesktop.Notifications first, which leaves noctalia unable to claim it
+# and kills notifications silently. Killing the processes isn't enough: systemd
+# restarts them. Mask both.
+#
+# install-deps.sh no longer installs either package, so this is a no-op on a
+# fresh machine; it matters on boxes that ran the old stack.
+for unit in waybar.service swaync.service; do
+    if systemctl --user list-unit-files "$unit" >/dev/null 2>&1; then
+        if [[ "$(systemctl --user is-enabled "$unit" 2>/dev/null)" != "masked" ]]; then
+            systemctl --user stop "$unit" >/dev/null 2>&1 || true
+            systemctl --user mask "$unit" >/dev/null 2>&1 \
+                && echo "  mask: $unit (would fight noctalia)"
+        fi
     fi
-fi
+done
 
 # Ulauncher — kept so the GNOME session still works as a fallback while you
 # settle into niri. Under niri the launcher is noctalia's (Alt+Space).

@@ -1,0 +1,24 @@
+diff --git a/src/shell/launcher/launcher_panel.cpp b/src/shell/launcher/launcher_panel.cpp
+index e4f2ec6..d5ec182 100644
+--- a/src/shell/launcher/launcher_panel.cpp
++++ b/src/shell/launcher/launcher_panel.cpp
+@@ -2147,6 +2147,19 @@ bool LauncherPanel::handleKeyEvent(std::uint32_t sym, std::uint32_t modifiers) {
+     return cycleCategory((modifiers & KeyMod::Shift) != 0);
+   }
+ 
++  // Also cycle categories with the configured tab_next / tab_previous chords
++  // (Tab / Shift+Tab by default), so the category filter is reachable from the
++  // home row and rebindable from [keybinds] like every other panel key. F6
++  // above still works. TabPrevious is tested first because Shift+Tab arrives as
++  // ISO_Left_Tab and would otherwise never be distinguishable from TabNext.
++  if (KeybindMatcher::matches(KeybindAction::TabPrevious, sym, modifiers)) {
++    return cycleCategory(true);
++  }
++
++  if (KeybindMatcher::matches(KeybindAction::TabNext, sym, modifiers)) {
++    return cycleCategory(false);
++  }
++
+   if (KeySymbol::isPageUp(sym)) {
+     const int stride = m_grid != nullptr ? static_cast<int>(m_grid->pageItemStride()) : 1;
+     moveSelection(-stride);

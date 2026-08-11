@@ -129,6 +129,28 @@ else
     rm -rf "$NOC_SRC"
     git clone https://github.com/noctalia-dev/noctalia-shell.git "$NOC_SRC"
 fi
+
+# Local patches, applied on top of upstream. The reset --hard above wipes them
+# every time, which is the point: they're re-applied from source of truth here
+# rather than living as uncommitted edits in a cache dir nobody backs up.
+#
+# FAIL LOUDLY if one stops applying. Tracking main means upstream will eventually
+# touch the same lines, and a patch that silently no-ops gives you a build that
+# looks fine and quietly lost a feature. Drop the patch (and this block) if
+# upstream implements it properly.
+PATCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../noctalia/patches" && pwd)"
+if [[ -d "$PATCH_DIR" ]]; then
+    for patch in "$PATCH_DIR"/*.patch; do
+        [[ -e "$patch" ]] || continue
+        if git -C "$NOC_SRC" apply --check "$patch" 2>/dev/null; then
+            git -C "$NOC_SRC" apply "$patch"
+            echo "    patched: $(basename "$patch")"
+        else
+            echo "    ERROR: $(basename "$patch") no longer applies to upstream main." >&2
+            echo "           Rebase or delete it, then re-run. Building unpatched." >&2
+        fi
+    done
+fi
 # --buildtype=release, not -Dnative_optimizations: the office box and this one
 # share a cache dir layout but not a CPU, and native codegen isn't portable.
 # --wipe reconfigures an existing build dir; it errors out if there isn't one.

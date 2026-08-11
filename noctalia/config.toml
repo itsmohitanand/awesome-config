@@ -78,6 +78,19 @@ end    = ["media", "tray", "notifications", "clipboard", "network", "volume", "b
 categories    = true
 sort_by_usage = true
 
+# In-panel navigation. Upstream hardcodes the category cycle to F6 and offers no
+# way to rebind it, so noctalia/patches/0001 makes it honour tab_next /
+# tab_previous as well — which is what makes the two lines below do anything for
+# the category row. F6 still works.
+#
+# Tab was free: the launcher had no binding on it at all. Change these if you
+# want the cycle somewhere else; no rebuild needed, [keybinds] is read at
+# runtime. If the patch ever stops applying, this silently reverts to F6-only.
+
+[keybinds]
+tab_next     = ["tab"]
+tab_previous = ["shift+iso_left_tab"]
+
 # ── Notifications ─────────────────────────────────────────────────────────────
 
 [notification]

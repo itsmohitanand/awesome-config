@@ -98,6 +98,29 @@ enabled = true
 timeout = 720
 action  = "screen_off"
 
+# ── Night light ───────────────────────────────────────────────────────────────
+# Replaces the wlsunset spawn that used to sit in niri/config.kdl — two clients
+# writing gamma at the same time is a fight, not a fallback.
+#
+# Same approach wlsunset took: compute sunrise/sunset from coordinates rather
+# than pinning fixed times, which matters at 55.7°N where the swing between June
+# and December is enormous. Coordinates are explicit rather than auto_locate so
+# it doesn't depend on IP geolocation (and so the office desk in the same repo
+# doesn't drift to a different city).
+#
+# Toggle with `noctalia msg nightlight-toggle`, or force it on outside the
+# schedule with nightlight-force-toggle.
+
+[location]
+latitude  = 55.68                  # Copenhagen
+longitude = 12.57
+
+[nightlight]
+enabled           = true
+force             = false
+temperature_day   = 6500
+temperature_night = 4000
+
 # ── Wallpaper ─────────────────────────────────────────────────────────────────
 # Replaces swww and set-wallpaper.sh. ~/.config/wallpapers is where install.sh
 # symlinks the per-theme renders from niri/wallpapers/, so the picker and the

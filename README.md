@@ -73,6 +73,12 @@ The cost of `Alt`: the compositor swallows `Alt+key` before the terminal sees it
 which breaks readline word operations. Binds avoid the ones worth keeping —
 hence `Alt+Shift+B` for the browser rather than `Alt+B`.
 
+noctalia adds `Alt+Tab` (window switcher), `Alt+A` (caffeine — inhibits the
+10-minute idle lock), `Alt+Shift+Q` (session menu), `Alt+Shift+N` (do not
+disturb), `Alt+Shift+W` (random wallpaper) and `Alt+,` (its settings). The
+volume, mic, brightness and media keys go through it too, so they draw an OSD
+instead of changing things silently.
+
 Press `Alt+Shift+/` for the full keybind list (`niri-keys`, which parses the
 config so it shows everything). `Alt+/` is niri's own built-in overlay, which
 only shows a curated subset.

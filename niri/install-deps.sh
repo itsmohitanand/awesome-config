@@ -25,7 +25,6 @@ echo "==> Installing desktop packages from apt"
 sudo apt update
 sudo apt install -y \
     wl-clipboard \
-    wlsunset \
     playerctl \
     brightnessctl \
     pavucontrol \

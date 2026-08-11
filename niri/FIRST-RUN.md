@@ -30,7 +30,7 @@ GNOME stays installed and selectable, so this is reversible at every step.
 ## Survival keybinds
 
 Every bind is **Alt**-based — Super sits on a home-row mod on the ZSA Voyager and
-is awkward to hold. `Alt+Shift+Slash` lists all 69 of them, searchable, which is
+is awkward to hold. `Alt+Shift+Slash` lists all 75 of them, searchable, which is
 the only one worth memorising.
 
 | Key | Action |
@@ -47,6 +47,9 @@ the only one worth memorising.
 | `Alt+O` | overview |
 | `Alt+W` | toggle floating |
 | `Alt+Q` | close window |
+| `Alt+Tab` | window switcher (noctalia) |
+| `Alt+A` | caffeine — inhibit the 10-minute idle lock |
+| `Alt+Shift+Q` | session menu (lock/suspend/logout/reboot) |
 | `Alt+Escape` | lock (noctalia's lock screen, PAM) |
 | `Alt+Shift+E` | **quit niri** |
 | `Print` / `Alt+Print` / `Ctrl+Print` | screenshot region / window / screen |
@@ -112,7 +115,8 @@ fallback.
   failure to reach the session is a GDM selection problem, not a niri one.
 - `bash -n` clean on every shell script; `jq` parses both ulauncher configs; both
   wallpaper scripts compile.
-- `niri-keys` parses the live config and renders all 69 binds.
+- `niri-keys` parses the live config and renders all 75 binds, through
+  `noctalia dmenu` now that fuzzel is gone.
 - `xwayland-satellite` present at the config path.
 - Post-install symlinks: noctalia's `config.toml` and `palettes/`, three
   wallpapers, and the `~/.local/bin` scripts resolve and are executable.

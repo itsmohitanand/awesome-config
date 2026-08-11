@@ -165,9 +165,9 @@ spawn-at-startup "/usr/libexec/xdg-desktop-portal-gnome"
 // is why the swayidle and set-wallpaper lines are gone.
 spawn-at-startup "sh" "-c" "$HOME/.local/bin/noctalia --daemon"
 
-// Copenhagen. At 55.7°N the summer/winter daylight swing is extreme, so let
-// wlsunset compute from coordinates rather than pinning fixed times.
-spawn-at-startup "wlsunset" "-l" "55.68" "-L" "12.57"
+// No wlsunset: noctalia's [nightlight] does the same job from the same
+// coordinates ([location] in noctalia/config.toml, Copenhagen 55.68/12.57).
+// Running both means two clients writing gamma at once.
 
 // XWayland for X11 apps (Slack, Discord, older GTK). niri 26.04 manages the
 // satellite process itself — don't spawn it manually and don't set DISPLAY,
@@ -348,6 +348,21 @@ binds {
     // hyprlock/swaylock are gone.
     Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg session lock"; }
 
+    // ─── noctalia panels ────────────────────────────────────────────────
+    // Alt+Tab has no niri equivalent — the compositor has no window switcher, so
+    // this overlay is noctalia's. It's a toggle, not a hold-to-cycle: a layer
+    // client can't see Alt being held, only the keypress niri forwards.
+    Alt+Tab      hotkey-overlay-title="Window switcher" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg window-switcher toggle"; }
+    // Softer than Alt+Shift+E, which quits niri outright with no confirmation.
+    Alt+Shift+Q  hotkey-overlay-title="Session menu" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle session"; }
+    Alt+Comma    hotkey-overlay-title="noctalia settings" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg settings-toggle"; }
+    Alt+Shift+N  hotkey-overlay-title="Do not disturb" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg notification-dnd-toggle"; }
+    // Idle inhibitor. noctalia owns the 10-minute lock now, so this is the way to
+    // hold it off during a presentation or a long build.
+    Alt+A        hotkey-overlay-title="Caffeine (inhibit idle)" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg caffeine-toggle"; }
+    // Picks from ~/.config/wallpapers, where install.sh links the renders.
+    Alt+Shift+W  hotkey-overlay-title="Random wallpaper" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg wallpaper-random"; }
+
     Alt+Q { close-window; }
 
     // Focus — hjkl and arrows both work. The "or-monitor" variants mean that
@@ -443,19 +458,22 @@ binds {
     Alt+Print        { screenshot-window; }
 
     // Media and hardware keys.
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" "--limit" "1.0"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
-    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-    XF86AudioPlay        allow-when-locked=true { spawn "playerctl" "play-pause"; }
-    XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
-    XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
+    // Through noctalia rather than wpctl/playerctl directly: same hardware, but
+    // it draws the OSD and keeps the bar's volume and media widgets in step.
+    // wpctl and playerctl are still installed if you need to script them.
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg volume-up"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg volume-down"; }
+    XF86AudioMute        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg volume-mute"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg mic-mute"; }
+    XF86AudioPlay        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg media toggle"; }
+    XF86AudioNext        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg media next"; }
+    XF86AudioPrev        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg media previous"; }
     // Keyboards with a dedicated calculator key. Harmless if yours has none.
     XF86Calculator hotkey-overlay-title="Calculator" {
         spawn "sh" "-c" "command -v qalculate-gtk >/dev/null && exec qalculate-gtk || exec gnome-calculator";
     }
-    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg brightness-down"; }
 
     // Session
     Alt+Shift+E { quit; }

@@ -320,13 +320,16 @@ binds {
     Alt+Slash       hotkey-overlay-title="Built-in overlay" { show-hotkey-overlay; }
 
     // Launching
-    Alt+Return hotkey-overlay-title="Terminal" { spawn "kitty"; }
+    // kitty is a ~/.local/bin install, which is not on niri's PATH, so a bare
+    // `spawn "kitty"` fails to exec with nothing to show for it. Same $HOME
+    // detour as the noctalia binds below.
+    Alt+Return hotkey-overlay-title="Terminal" { spawn "sh" "-c" "$HOME/.local/bin/kitty"; }
     // noctalia panels are driven over its IPC socket. `sh -c` because these go
     // through $HOME — see the environment block above for why there's no PATH.
     Alt+Space  hotkey-overlay-title="Launcher" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle launcher"; }
     // Not Alt+B — that's readline backward-word, which is worth keeping.
     Alt+Shift+B hotkey-overlay-title="Browser" { spawn "firefox"; }
-    Alt+E      hotkey-overlay-title="Files"    { spawn "kitty" "-e" "yazi"; }
+    Alt+E      hotkey-overlay-title="Files"    { spawn "sh" "-c" "$HOME/.local/bin/kitty -e yazi"; }
     // Not Alt+C — that's center-column. qalculate does units, currency and
     // symbolic algebra, so it's worth a key; gnome-calculator is the fallback
     // if it isn't installed.

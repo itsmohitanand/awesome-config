@@ -50,6 +50,7 @@ the only one worth memorising.
 | `Alt+Escape` | lock (swaylock — hyprlock isn't packaged on 24.04) |
 | `Alt+Shift+E` | **quit niri** |
 | `Print` / `Alt+Print` / `Ctrl+Print` | screenshot region / window / screen |
+| `Alt+S` / `Alt+Shift+S` / `Alt+Ctrl+S` | same, for keyboards with no Print key |
 
 Cost of the Alt scheme: the compositor swallows Alt+key before the terminal sees
 it, so some readline word-operations are gone. Binds were chosen to avoid the

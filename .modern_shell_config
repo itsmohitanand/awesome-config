@@ -139,6 +139,8 @@ alias dprune='docker system prune -f'
 #   PATH="$HOME/.local/go/bin:$PATH" GOBIN="$HOME/.local/bin" \
 #       go install github.com/naggie/dstask/cmd/dstask@v1.0.1
 export DSTASK_GIT_REPO="$HOME/Documents/tasks"
+export EDITOR=nvim
+export VISUAL=nvim
 
 if command -v dstask >/dev/null; then
     alias t='dstask'

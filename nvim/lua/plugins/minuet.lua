@@ -2,7 +2,7 @@ return {
   'milanglacier/minuet-ai.nvim',
   config = function()
     require('minuet').setup({
-      provider = 'openai_fim_compatible',
+      provider = 'openai',
       n_completions = 1,
       context_window = 8192,
       throttle = 1500,
@@ -10,11 +10,10 @@ return {
       request_timeout = 10,
       notify = 'warn',
       provider_options = {
-        openai_fim_compatible = {
-          api_key = 'TERM',
-          name = 'Ollama',
-          end_point = 'http://localhost:11434/v1/completions',
-          model = 'deepseek-coder-v2:lite',
+        openai = {
+          -- name of the env var, not the key itself
+          api_key = 'OPENAI_API_KEY',
+          model = 'gpt-4.1-mini',
           optional = {
             max_tokens = 256,
             top_p = 0.9,

@@ -32,6 +32,9 @@ input {
 
     mouse {
         accel-profile "flat"
+        // -1.0 slowest .. 0.0 default .. 1.0 fastest. Flat profile, so this is
+        // a straight sensitivity multiplier. Tune to taste; niri hot-reloads.
+        accel-speed 0.0
     }
 
     // Keyboard focus only — the whole point is not touching the mouse.

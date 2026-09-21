@@ -481,6 +481,8 @@ binds {
     // Session
     Alt+Shift+E { quit; }
     Alt+Shift+P { power-off-monitors; }
+    // Games: blank every screen but the focused one so the cursor can't escape.
+    Alt+Ctrl+M hotkey-overlay-title="Solo monitor (toggle)" { spawn "sh" "-c" "$HOME/.local/bin/niri-solo-monitor"; }
 }
 
 // ─── Theme ──────────────────────────────────────────────────────────────────

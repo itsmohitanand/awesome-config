@@ -70,7 +70,8 @@ link noctalia/config.toml              "$HOME/.config/noctalia/config.toml"
 link noctalia/palettes                 "$HOME/.config/noctalia/palettes"
 
 link niri/keys.sh                      "$HOME/.local/bin/niri-keys"
-chmod +x "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/install-deps.sh" \
+link niri/solo-monitor.sh              "$HOME/.local/bin/niri-solo-monitor"
+chmod +x "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/solo-monitor.sh" "$DOTFILES/niri/install-deps.sh" \
          "$DOTFILES/noctalia/make-palette.py"
 mkdir -p "$HOME/.config/wallpapers" "$HOME/Pictures/Screenshots"
 

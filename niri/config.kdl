@@ -423,12 +423,12 @@ binds {
 
     Alt+W { toggle-window-floating; }
 
-    // Screenshots (built in — no flameshot needed).
-    // Alt+S mirrors Print for keyboards without one (Voyager, 60% boards).
-    Print            { screenshot; }
+    // Print opens a lightweight region snip with annotation and save/copy.
+    // Alt+S mirrors it for keyboards without a Print key (Voyager, 60% boards).
+    Print            { spawn "screenshot-region"; }
     Ctrl+Print       { screenshot-screen; }
     Alt+Print        { screenshot-window; }
-    Alt+S            { screenshot; }
+    Alt+S            { spawn "screenshot-region"; }
     Alt+Ctrl+S       { screenshot-screen; }
     Alt+Shift+S      { screenshot-window; }
 

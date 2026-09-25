@@ -10,6 +10,7 @@ session on Ubuntu, with kitty, zellij, starship and neovim inside it.
 | [niri](https://github.com/YaLTeR/niri) | Scrollable-tiling Wayland compositor |
 | [waybar](https://github.com/Alexays/Waybar) | Top panel |
 | [fuzzel](https://codeberg.org/dnkl/fuzzel) | Application launcher (`Alt+Space`) |
+| [swappy](https://github.com/jtheoof/swappy) | Lightweight screenshot annotation (`Print`, with `grim` and `slurp`) |
 | [swaync](https://github.com/ErikReider/SwayNotificationCenter) | Notifications + control centre (`Alt+N`) |
 | [kitty](https://sw.kovidgoyal.net/kitty/) | GPU-accelerated terminal emulator |
 | [starship](https://starship.rs/) | Cross-shell prompt |

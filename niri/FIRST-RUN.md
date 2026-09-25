@@ -49,8 +49,9 @@ the only one worth memorising.
 | `Alt+Q` | close window |
 | `Alt+Escape` | lock (swaylock — hyprlock isn't packaged on 24.04) |
 | `Alt+Shift+E` | **quit niri** |
-| `Print` / `Alt+Print` / `Ctrl+Print` | screenshot region / window / screen |
-| `Alt+S` / `Alt+Shift+S` / `Alt+Ctrl+S` | same, for keyboards with no Print key |
+| `Print` / `Alt+S` | select a region, annotate, then save or copy |
+| `Alt+Print` / `Alt+Shift+S` | screenshot focused window |
+| `Ctrl+Print` / `Alt+Ctrl+S` | screenshot focused screen |
 
 Cost of the Alt scheme: the compositor swallows Alt+key before the terminal sees
 it, so some readline word-operations are gone. Binds were chosen to avoid the

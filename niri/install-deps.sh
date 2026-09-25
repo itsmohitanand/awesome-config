@@ -26,6 +26,9 @@ sudo apt update
 sudo apt install -y \
     waybar \
     fuzzel \
+    grim \
+    slurp \
+    swappy \
     sway-notification-center \
     swaybg \
     swaylock \

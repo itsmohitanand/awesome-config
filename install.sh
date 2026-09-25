@@ -69,8 +69,11 @@ link swaync/style.css                  "$HOME/.config/swaync/style.css"
 link niri/set-wallpaper.sh             "$HOME/.local/bin/set-wallpaper"
 link niri/lock.sh                      "$HOME/.local/bin/lock-session"
 link niri/keys.sh                      "$HOME/.local/bin/niri-keys"
+link niri/screenshot-region.sh         "$HOME/.local/bin/screenshot-region"
+link swappy/config                     "$HOME/.config/swappy/config"
 chmod +x "$DOTFILES/niri/set-wallpaper.sh" "$DOTFILES/niri/lock.sh" \
-         "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/install-deps.sh"
+         "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/screenshot-region.sh" \
+         "$DOTFILES/niri/install-deps.sh"
 mkdir -p "$HOME/.config/wallpapers" "$HOME/Pictures/Screenshots"
 
 # Pre-rendered wallpapers, one per theme, so a fresh clone has them without

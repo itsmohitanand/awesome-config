@@ -1,137 +1,95 @@
-# niri — first run
+# Niri + DMS on Ubuntu 24.04
 
-State of the niri setup on this machine, what's verified, and what to do next.
-Written 2026-08-11 on Ubuntu 24.04, RTX 5090 + AMD iGPU, three 2560x1440 panels.
-
-## Getting into the session
-
-`Niri` appears in GDM's session list. **GDM remembers the last session and reuses
-it silently**, so typing your password straight away logs you back into whatever
-you used before — this is the usual reason "I picked niri but I'm still in GNOME".
-
-1. Click your username at the login screen.
-2. Click the **gear / cog icon at the bottom-right** — *before* typing anything.
-3. Pick **Niri**.
-4. Then type your password and log in.
-
-Sessions installed here:
-
-| Name | Type |
-| ---- | ---- |
-| Niri | Wayland |
-| Ubuntu | Wayland |
-| Ubuntu on Wayland | Wayland |
-| Ubuntu | Xorg |
-| Ubuntu on Xorg | Xorg |
-
-GNOME stays installed and selectable, so this is reversible at every step.
-`Alt+Shift+E` quits niri back to GDM.
-
-## Survival keybinds
-
-Every bind is **Alt**-based — Super sits on a home-row mod on the ZSA Voyager and
-is awkward to hold. `Alt+Shift+Slash` lists all 69 of them, searchable, which is
-the only one worth memorising.
-
-| Key | Action |
-| --- | ------ |
-| `Alt+Return` | terminal (kitty) |
-| `Alt+Space` | launcher (fuzzel) |
-| `Alt+Shift+Slash` | all keybinds, searchable |
-| `Alt+H` / `Alt+L` | focus left / right, crosses monitors |
-| `Alt+J` / `Alt+K` | focus down / up |
-| `Alt+Shift+H` / `Alt+Shift+L` | move window left / right |
-| `Alt+1`…`Alt+9` | workspace 1-9 |
-| `Alt+R` | cycle column width (1/3, 1/2, 2/3) |
-| `Alt+M` / `Alt+Shift+F` | maximise column / fullscreen window |
-| `Alt+O` | overview |
-| `Alt+W` | toggle floating |
-| `Alt+Q` | close window |
-| `Alt+Escape` | lock (swaylock — hyprlock isn't packaged on 24.04) |
-| `Alt+Shift+E` | **quit niri** |
-| `Print` / `Alt+S` | select a region, annotate, then save or copy |
-| `Alt+Print` / `Alt+Shift+S` | screenshot focused window |
-| `Ctrl+Print` / `Alt+Ctrl+S` | screenshot focused screen |
-
-Cost of the Alt scheme: the compositor swallows Alt+key before the terminal sees
-it, so some readline word-operations are gone. Binds were chosen to avoid the
-ones worth keeping — hence `Alt+Shift+B` for browser rather than `Alt+B`.
-
-## First thing after logging in
-
-The three output blocks in `config.kdl` are **commented out** because the DRM
-names have to be confirmed from inside a niri session:
+## Try it inside Ubuntu first
 
 ```bash
-niri msg outputs
+bash dms/install.sh
+bash dms/preview.sh
+# Automated preview with screenshots and an automatic exit:
+bash dms/preview.sh --smoke
 ```
 
-Then uncomment the block in `~/.config/niri/config.kdl` (a symlink into this
-repo) and fill in the real values. **niri hot-reloads on save** — no restart. Keep
-a terminal open while editing: an invalid config is rejected and the previous one
-stays live, so you can't lock yourself out.
+The preview opens a nested Niri window using separate settings and a private
+D-Bus session. Close that window to exit. It disables idle/suspend locking and
+uses DMS's **demo** lock screen for screenshots. Logs and images are printed under
+`/tmp/dms-preview.*`. The smoke test checks rendering and IPC, not password unlock.
 
-Two traps:
+Verified on 2026-09-29: Niri 26.04, Ubuntu 24.04.5, NVIDIA RTX 5090, DMS 1.6.2,
+and portable Quickshell 0.3.1. Desktop, launcher, and lock demo render. This does
+**not** prove a GDM/DRM session works: nested rendering uses the host desktop's
+output, not the physical output modes in `config.kdl`. The earlier blank login
+has not been diagnosed; the user journal was inaccessible during this check.
 
-- X11's `HDMI-0` is a different name on the DRM side, usually `HDMI-A-1`.
-- All three panels do **74.98 Hz** but advertise 59.95 as "preferred". Pin the
-  higher one or you silently run at the lower rate.
+## Installation and runtime
 
-`niri validate` checks the file before you trust it.
+`bash install.sh` installs the pinned user-local DMS runtime before linking the
+Niri config. DMS owns the bar, launcher, notifications, clipboard, wallpaper,
+and idle lock. Waybar, SwayNC, Swayidle and swww are no longer autostarted.
+The installer masks the user Waybar and SwayNC services to prevent duplicate
+panels/notification servers at login. Legacy configs and the standalone lock
+fallback remain available.
 
-## Verify these, in order
+Ubuntu 24.04's Qt 6.4 is too old for current Quickshell. `dms/install.sh` installs
+DMS from its upstream release and a **third-party pkgforge Quickshell AppImage**
+under `~/.local/share/awesome-config/dms-1.6.2`. Both downloads have pinned SHA-256
+checksums. It extracts the AppImage, so FUSE is unnecessary. Its cross-libc
+preloads deadlocked in jemalloc here; the installer moves them aside inside
+that private runtime. It changes no system Qt libraries, apt sources, or PAM files.
+This is a tested local workaround, not official DMS support for Ubuntu 24.04.
 
-1. **waybar** appears at the top. This is the one config that could not be
-   validated offline — waybar exits with "Bar need to run under Wayland" before
-   parsing its JSONC. If the bar is missing, run `waybar` in a terminal to see
-   the parse error. Note `waybar.service` is deliberately masked so systemd
-   doesn't start a second bar on top of the one niri spawns.
-2. **Wallpaper** crossfades in via `swww`. `switch-theme cyberdream` tests a live
-   theme swap across niri, waybar, swaync, fuzzel, GTK/Qt and wallpaper.
-3. **`Alt+N`** opens swaync.
-4. **DBeaver** launches. This is the XWayland test — see "known unknown" below.
-   Thunderbird is native Wayland (`MOZ_ENABLE_WAYLAND=1` is set) and should be
-   fine.
-5. **Volume / brightness keys** — they shell out to `wpctl` and `brightnessctl`.
+DMS settings are writable copies in `~/.config/DankMaterialShell/settings.json`.
+The installer seeds them only if absent; subsequent GUI changes are preserved.
+It also seeds the Everblush wallpaper in DMS's state file. DMS app-theme generation
+is initially disabled so the repository's `switch-theme` remains authoritative.
+Do not use `dms update` for this pinned setup; update the installer and re-test the
+runtime as a pair.
 
-## Known unknown
+## Login and shortcuts
 
-`config.kdl` points `xwayland-satellite` at `~/.cargo/bin/xwayland-satellite`
-rather than a hardcoded `/home/<user>/...`. The config **validates** and the
-binary **is** at that path, but whether niri expands `~` at spawn time is
-untested. If X11 apps (DBeaver, Slack, Discord) fail to launch, that line is the
-first suspect — replace the tilde with the literal path to confirm.
+At GDM, select your username, choose **Niri** using the gear, then log in.
+Ubuntu/GNOME remains selectable. `Alt+Shift+E` exits Niri back to GDM.
 
-## What's verified
+| Key | Action |
+| --- | --- |
+| `Alt+Return` | Ghostty |
+| `Alt+Space` | DMS launcher |
+| `Alt+N` | DMS notifications |
+| `Alt+V` | DMS clipboard |
+| `Alt+,` | DMS settings |
+| `Alt+Escape` | DMS lock; standalone locker if DMS is unavailable |
+| `Alt+Shift+Slash` | Search all shortcuts through Fuzzel |
+| `Alt+H/J/K/L` | Focus windows/monitors |
+| `Alt+O` | Niri overview |
+| `Alt+Shift+E` | Quit Niri |
 
-- `niri validate` passes, both on the repo file and the symlinked config.
-- niri **starts**: ran nested for 15s with a minimal config, no errors. So a
-  failure to reach the session is a GDM selection problem, not a niri one.
-- `bash -n` clean on all eight shell scripts; `jq` parses swaync + both ulauncher
-  configs; both wallpaper scripts compile.
-- `niri-keys` parses the live config and renders all 69 binds.
-- `swww` + `swww-daemon` 0.11.2, `xwayland-satellite` present at the config path.
-- Post-install symlinks: `theme.css` (waybar + swaync), three wallpapers, and all
-  four `~/.local/bin` scripts resolve and are executable.
+## The password screen
 
-## Build gotchas already fixed in `install-deps.sh`
+The previous plain circle and retry counter came from `niri/lock.sh` using
+Swaylock. DMS replaces it with a wallpaper, clock, date, and password field.
+It does not replace GDM's login screen or automatically fix rejected passwords.
 
-Three apt packages were missing from the original list, each fatal rather than
-degrading:
+Defaults select **system PAM authentication**, `/etc/pam.d/login`, preserving
+Ubuntu's `common-auth` and SSSD/domain authentication. No password is stored.
+DMS's validator accepts the stack; it reports a missing `pam_lastlog.so` in an
+optional *session* rule in Ubuntu's login file. That is not evidence of a failed
+authentication rule. Actual successful unlock must be tested by the user.
 
-| Package | Without it |
-| ------- | ---------- |
-| `libclang-dev` | `xwayland-satellite` fails — bindgen finds only versioned `libclang-NN.so.1`, not the `libclang.so` it searches for |
-| `liblz4-dev` | swww's `common/build.rs` panics on the `liblz4` pkg-config probe |
-| `wayland-protocols` | `swww-daemon` fails — probed by its `waybackend-scanner` dep, not visible in swww's own `build.rs` |
+Idle lock is 10 minutes; monitor power-off is 12 minutes; lock before suspend is
+enabled. Configure these in DMS settings. Do not also start Swayidle or another
+locker in the same session.
 
-swww is also a cargo **workspace**, so both packages must be named:
-`cargo install --git https://github.com/LGFae/swww --locked swww swww-daemon`.
+## If the real session is blank
 
-## GPU note
+Try `Alt+Return`, `Alt+Space`, and `Alt+Shift+E`. Inspect these from a working
+terminal or TTY:
 
-Two GPUs: RTX 5090 at `01:00.0`, AMD iGPU at `74:00.0`. Do **not** identify them
-by `renderD` number — on this box the iGPU enumerates *first* (`renderD128` =
-iGPU, `renderD129` = NVIDIA), the reverse of what you'd assume. `config.kdl` pins
-the render device by PCI path, which is stable, so niri can't fall back to the
-iGPU and render slowly or come up dark.
+```bash
+niri validate
+journalctl --user -u niri.service -b --no-pager
+niri msg outputs  # only from a running Niri session
+~/.local/bin/dms doctor
+```
+
+Check output names and advertised modes before changing the pinned monitor
+blocks. The render GPU is selected by PCI path, not unstable renderD numbering.
+A working nested preview does not validate those physical-display settings.

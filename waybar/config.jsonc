@@ -37,7 +37,7 @@
     "separate-outputs": true,
     "rewrite": {
       "(.*) — Mozilla Firefox": "$1",
-      "(.*) - kitty": "$1"
+      "(.*) - ghostty": "$1"
     }
   },
 

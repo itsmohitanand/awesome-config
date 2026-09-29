@@ -142,31 +142,9 @@ layout {
 }
 
 // ─── Startup ────────────────────────────────────────────────────────────────
-// Order matters a little: portals and the polkit agent should be up before apps.
-
-spawn-at-startup "/usr/libexec/xdg-desktop-portal-gnome"
-
-// Ubuntu's waybar package ships a globally-enabled waybar.service that is
-// WantedBy=graphical-session.target, which niri.service joins — so it would
-// start a SECOND bar alongside this one. It's masked for this user:
-//     systemctl --user mask waybar.service
-// install.sh does this for you. Undo with `systemctl --user unmask waybar.service`
-// if you'd rather let systemd own the bar than this config.
-spawn-at-startup "waybar"
-spawn-at-startup "swaync"
-// Copenhagen. At 55.7°N the summer/winter daylight swing is extreme, so let
-// wlsunset compute from coordinates rather than pinning fixed times.
-spawn-at-startup "wlsunset" "-l" "55.68" "-L" "12.57"
-spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
-
-// Idle: dim-free, just lock at 10min, screens off at 12min, lock before suspend.
-// The -w on before-sleep makes the lock finish before the machine suspends.
-spawn-at-startup "swayidle" "-w" \
-    "timeout" "600" "lock-session" \
-    "timeout" "720" "niri msg action power-off-monitors" \
-    "resume" "niri msg action power-on-monitors" \
-    "before-sleep" "$HOME/.local/bin/lock-session"
-spawn-at-startup "sh" "-c" "$HOME/.local/bin/set-wallpaper"
+// DMS owns the panel, launcher, notifications, clipboard, wallpaper and idle lock.
+// User-local wrapper supplies its private Quickshell runtime on Ubuntu 24.04.
+spawn-at-startup "sh" "-c" "$HOME/.local/bin/dms run"
 
 // XWayland for X11 apps (Slack, Discord, older GTK). niri 26.04 manages the
 // satellite process itself — don't spawn it manually and don't set DISPLAY,
@@ -261,7 +239,7 @@ window-rule {
 
 // Terminals and the editor get a bit more room by default.
 window-rule {
-    match app-id="^kitty$"
+    match app-id="^com[.]mitchellh[.]ghostty$"
     default-column-width { proportion 0.5; }
 }
 
@@ -299,8 +277,9 @@ window-rule {
 }
 
 layer-rule {
-    match namespace="^waybar$"
-    // Bar sits above the shadow layer without gaining a shadow of its own.
+    match namespace="^quickshell$"
+    // Place DMS wallpaper in the overview backdrop.
+    place-within-backdrop true
     shadow { off; }
 }
 
@@ -316,11 +295,11 @@ binds {
     Alt+Slash       hotkey-overlay-title="Built-in overlay" { show-hotkey-overlay; }
 
     // Launching
-    Alt+Return hotkey-overlay-title="Terminal" { spawn "kitty"; }
-    Alt+Space  hotkey-overlay-title="Launcher" { spawn "fuzzel"; }
+    Alt+Return hotkey-overlay-title="Terminal" { spawn "ghostty"; }
+    Alt+Space  hotkey-overlay-title="Launcher" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call spotlight toggle"; }
     // Not Alt+B — that's readline backward-word, which is worth keeping.
     Alt+Shift+B hotkey-overlay-title="Browser" { spawn "firefox"; }
-    Alt+E      hotkey-overlay-title="Files"    { spawn "kitty" "-e" "yazi"; }
+    Alt+E      hotkey-overlay-title="Files"    { spawn "ghostty" "-e" "yazi"; }
     // Not Alt+C — that's center-column. qalculate does units, currency and
     // symbolic algebra, so it's worth a key; gnome-calculator is the fallback
     // if it isn't installed.
@@ -328,11 +307,13 @@ binds {
         spawn "sh" "-c" "command -v qalculate-gtk >/dev/null && exec qalculate-gtk || exec gnome-calculator";
     }
     Alt+V      hotkey-overlay-title="Clipboard history" {
-        spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy";
+        spawn "sh" "-c" "$HOME/.local/bin/dms ipc call clipboard toggle";
     }
-    Alt+N      hotkey-overlay-title="Notifications" { spawn "swaync-client" "-t" "-sw"; }
+    Alt+N      hotkey-overlay-title="Notifications" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call notifications toggle"; }
     // Not Alt+L — that's focus-column-right. Lock is Alt+Escape.
     Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/lock-session"; }
+
+    Alt+Comma hotkey-overlay-title="Desktop settings" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call settings toggle"; }
 
     Alt+Q { close-window; }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # switch-theme <name>
 # Switches every themed surface in one command:
-#   terminal   — kitty
+#   terminal   — ghostty
 #   shell      — starship
 #   editor     — neovim
 #   multiplex  — zellij
@@ -14,7 +14,7 @@
 #
 # Available themes: poimandres | cyberdream | everblush
 #
-# Surfaces that support an include/import (kitty, waybar, swaync) get their
+# Surfaces that support an include/import (ghostty, waybar, swaync) get their
 # include line or symlink repointed. Surfaces that don't (starship, nvim,
 # zellij, niri, fuzzel) get rewritten in place with sed.
 
@@ -24,8 +24,8 @@ THEME="${1:?Usage: switch-theme <poimandres|cyberdream|everblush>}"
 
 DOTFILES="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
 
-KITTY_CONF="$HOME/.config/kitty/kitty.conf"
-KITTY_THEME="$HOME/.config/kitty/themes/${THEME}.conf"
+GHOSTTY_CONF="$HOME/.config/ghostty/config.ghostty"
+GHOSTTY_THEME="$HOME/.config/ghostty/themes/${THEME}.conf"
 STARSHIP_CONF="$HOME/.config/starship.toml"
 NVIM_INIT="$HOME/.config/nvim/init.lua"
 ZELLIJ_CONF="$HOME/.config/zellij/config.kdl"
@@ -34,7 +34,7 @@ FUZZEL_CONF="$HOME/.config/fuzzel/fuzzel.ini"
 GTK_PALETTE="$DOTFILES/themes/${THEME}.css"
 
 # ── Palette table ───────────────────────────────────────────────────────────
-# Keep in sync with themes/<name>.css and kitty/themes/<name>.conf.
+# Keep in sync with themes/<name>.css and ghostty/themes/<name>.conf.
 case "$THEME" in
 poimandres)
     BG=1B1E28; BG_ALT=171922; SURFACE=303340
@@ -57,18 +57,18 @@ everblush)
     ;;
 esac
 
-if [[ ! -f "$KITTY_THEME" ]]; then
-    echo "Error: No kitty theme file found at $KITTY_THEME" >&2
+if [[ ! -f "$GHOSTTY_THEME" ]]; then
+    echo "Error: No ghostty theme file found at $GHOSTTY_THEME" >&2
     exit 1
 fi
 
 # Only touch a surface if it's actually installed. Lets this script stay useful
-# on a machine that has kitty/nvim but not the full niri desktop.
+# on a machine that has ghostty/nvim but not the full niri desktop.
 edit() { [[ -f "$1" ]]; }
 
 # ── Terminal, shell, editor, multiplexer ────────────────────────────────────
 
-sed --follow-symlinks -i "s|^include themes/.*\.conf|include themes/${THEME}.conf|" "$KITTY_CONF"
+sed --follow-symlinks -i "s|^config-file = themes/.*\.conf|config-file = themes/${THEME}.conf|" "$GHOSTTY_CONF"
 edit "$STARSHIP_CONF" && sed --follow-symlinks -i "s|^palette = '.*'|palette = '${THEME}'|" "$STARSHIP_CONF"
 edit "$NVIM_INIT"     && sed --follow-symlinks -i "s|^local theme = '.*'|local theme = '${THEME}'|" "$NVIM_INIT"
 edit "$ZELLIJ_CONF"   && sed --follow-symlinks -i "s|^theme \".*\"|theme \"${THEME}\"|" "$ZELLIJ_CONF"
@@ -153,7 +153,7 @@ pgrep -x swaync >/dev/null && swaync-client --reload-css >/dev/null 2>&1 || true
 pgrep -x niri   >/dev/null && echo "  niri   — config reloaded automatically" || true
 
 echo "Switched to theme: ${THEME}"
-echo "  kitty    — reload with ctrl+shift+F5"
+echo "  ghostty    — reload with ctrl+shift+F5"
 echo "  zellij   — requires session restart"
 echo "  nvim     — restart or :source"
 echo "  starship — takes effect in new shells"

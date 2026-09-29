@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-deps.sh — install the niri desktop stack on Ubuntu 26.04.
+# install-deps.sh — install the niri desktop stack on Ubuntu 24.04 / 26.04.
 #
 #   ./niri/install-deps.sh          apt packages + build niri from source
 #   ./niri/install-deps.sh --ppa    apt packages + niri from a third-party PPA
@@ -28,7 +28,6 @@ sudo apt install -y \
     fuzzel \
     grim \
     slurp \
-    swappy \
     sway-notification-center \
     swaybg \
     swaylock \
@@ -60,6 +59,34 @@ sudo apt install -y \
     libtllist-dev \
     libpixman-1-dev \
     libpng-dev
+
+# Ubuntu 24.04 does not package Swappy. Preserve screenshot annotation by
+# building a pinned upstream release when apt has no candidate.
+if command -v swappy >/dev/null; then
+    echo "==> swappy — already installed"
+elif apt-cache policy swappy | grep -E 'Candidate: [^ (]' >/dev/null; then
+    sudo apt install -y swappy
+else
+    echo "==> Building swappy 1.8.0 (not available from apt)"
+    sudo apt install -y build-essential pkg-config git gettext \
+        libgtk-3-dev libcairo2-dev libpango1.0-dev libglib2.0-dev fonts-font-awesome
+    SWAPPY_SRC="${XDG_CACHE_HOME:-$HOME/.cache}/awesome-config-swappy-1.8.0"
+    if [[ ! -d "$SWAPPY_SRC" ]]; then
+        git clone --depth 1 --branch v1.8.0 https://github.com/jtheoof/swappy.git "$SWAPPY_SRC"
+    fi
+    # Check the release commit before building, including on interrupted reruns.
+    [[ "$(git -C "$SWAPPY_SRC" rev-parse HEAD)" == c25040258fb9dde3dd7313e419a514436741cfe5 ]] \
+        || { echo "Unexpected Swappy source revision at $SWAPPY_SRC" >&2; exit 1; }
+    if [[ -f "$SWAPPY_SRC/build/meson-private/coredata.dat" ]]; then
+        meson setup --reconfigure "$SWAPPY_SRC/build" "$SWAPPY_SRC" \
+            --prefix="$HOME/.local" --buildtype=release
+    else
+        meson setup "$SWAPPY_SRC/build" "$SWAPPY_SRC" \
+            --prefix="$HOME/.local" --buildtype=release
+    fi
+    ninja -C "$SWAPPY_SRC/build"
+    ninja -C "$SWAPPY_SRC/build" install
+fi
 
 # hyprlock is a nicer lock screen than swaylock and is packaged on 26.04.
 if apt-cache policy hyprlock 2>/dev/null | grep -q Candidate:\ [0-9]; then

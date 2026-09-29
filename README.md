@@ -1,31 +1,51 @@
 # awesome-config
 
 Desktop and terminal configuration: a [niri](https://github.com/YaLTeR/niri) Wayland
-session on Ubuntu, with kitty, zellij, starship and neovim inside it.
+session on Ubuntu, with DankMaterialShell, Ghostty, Zellij, Starship and Neovim.
 
 ## Tools
 
 | Tool | Purpose |
 |------|---------|
 | [niri](https://github.com/YaLTeR/niri) | Scrollable-tiling Wayland compositor |
-| [waybar](https://github.com/Alexays/Waybar) | Top panel |
-| [fuzzel](https://codeberg.org/dnkl/fuzzel) | Application launcher (`Alt+Space`) |
+| [DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell) | Panel, launcher, notifications, clipboard, wallpaper and lock screen |
+| [fuzzel](https://codeberg.org/dnkl/fuzzel) | Searchable shortcut helper (`Alt+Shift+Slash`) |
 | [swappy](https://github.com/jtheoof/swappy) | Lightweight screenshot annotation (`Print`, with `grim` and `slurp`) |
-| [swaync](https://github.com/ErikReider/SwayNotificationCenter) | Notifications + control centre (`Alt+N`) |
-| [kitty](https://sw.kovidgoyal.net/kitty/) | GPU-accelerated terminal emulator |
+| [ghostty](https://ghostty.org/) | GPU-accelerated terminal emulator |
 | [starship](https://starship.rs/) | Cross-shell prompt |
 | [zellij](https://zellij.dev/) | Terminal multiplexer |
 | [neovim](https://neovim.io/) | Text editor |
 | [ulauncher](https://ulauncher.io/) | Launcher for the fallback GNOME session (`Ctrl+Space`) |
 
+## DMS preview on Ubuntu 24.04
+
+```bash
+bash dms/install.sh
+bash dms/preview.sh
+```
+
+DMS uses a pinned, private portable Qt/Quickshell runtime on 24.04. The installer
+uses a third-party AppImage with a documented compatibility workaround; it does
+not replace Ubuntu's Qt or login manager. See [first-run notes](niri/FIRST-RUN.md)
+for tested behavior, authentication, screenshots, and troubleshooting.
+`Alt+,` opens desktop settings; `Alt+Escape` uses the new wallpaper-and-clock lock.
+The Waybar/SwayNC sections below describe retained legacy configurations.
+
 ## Install
 
 ```bash
-git clone https://github.com/itsmohitanand/awesome-config.git
+git clone --branch alipes https://github.com/itsmohitanand/awesome-config.git
 cd awesome-config
 ./niri/install-deps.sh      # apt packages + build niri (see notes below)
 bash install.sh             # symlink configs, apply current theme
 ```
+
+On a fresh Ubuntu machine with Ghostty already installed, run
+`bash setup-machine.sh` as your normal user. It asks for sudo, installs the
+build prerequisites and desktop stack, builds Starship/Zellij and nightly
+Neovim when missing, installs Iosevka Nerd Font, and enables the Bash config.
+Source builds can take a while. Existing config files are backed up by the
+installer before they are replaced with symlinks.
 
 `install.sh` creates symlinks from `~/.config/` back to the repo, so any edits in
 the repo are live immediately.
@@ -95,7 +115,7 @@ switch-theme cyberdream
 
 | Surface | How theme is applied |
 |---------|---------------------|
-| kitty | `include themes/<name>.conf` in `kitty.conf` — reload with `ctrl+shift+F5` |
+| ghostty | `config-file = themes/<name>.conf` in `ghostty/config` — reload with `ctrl+shift+F5` |
 | starship | `palette = '<name>'` in `starship.toml` — takes effect in new shells |
 | zellij | `theme "<name>"` in `config.kdl` — requires session restart |
 | neovim | `local theme = '<name>'` in `init.lua` — restart or `:source` |
@@ -147,7 +167,7 @@ surfaces that can't `@import`.
 
 ### Adding a new theme
 
-1. Add `kitty/themes/<name>.conf` with color definitions
+1. Add `ghostty/themes/<name>.conf` with color definitions
 2. Add `themes/<name>.css` with the ten `@define-color` names
 3. Add a matching `<name>)` case to the palette table in `switch-theme.sh`
 4. Add a `[palettes.<name>]` block to `starship/starship.toml`
@@ -182,8 +202,8 @@ awesome-config/
 ├── swaync/
 │   ├── config.json         # → ~/.config/swaync/config.json
 │   └── style.css           # → ~/.config/swaync/style.css
-├── kitty/
-│   ├── kitty.conf
+├── ghostty/
+│   ├── config
 │   └── themes/
 │       ├── poimandres.conf
 │       ├── cyberdream.conf

@@ -30,17 +30,24 @@ link() {
     fi
 
     mkdir -p "$(dirname "$dest")"
+    # Preserve existing files/directories before replacing them with links.
+    if [[ -e "$dest" || -L "$dest" ]]; then
+        local backup
+        backup="${dest}.backup.$(date +%Y%m%d-%H%M%S).$$"
+        mv "$dest" "$backup"
+        printf '  backup: %s\n' "$backup"
+    fi
     ln -sfn "$src" "$dest"
     printf '  link: %s -> %s\n' "$dest" "$src"
 }
 
 echo "Symlinking awesome-config from $DOTFILES"
 
-# Kitty
-link kitty/kitty.conf                  "$HOME/.config/kitty/kitty.conf"
-link kitty/themes/poimandres.conf      "$HOME/.config/kitty/themes/poimandres.conf"
-link kitty/themes/cyberdream.conf      "$HOME/.config/kitty/themes/cyberdream.conf"
-link kitty/themes/everblush.conf       "$HOME/.config/kitty/themes/everblush.conf"
+# Ghostty
+link ghostty/config                  "$HOME/.config/ghostty/config.ghostty"
+link ghostty/themes/poimandres.conf      "$HOME/.config/ghostty/themes/poimandres.conf"
+link ghostty/themes/cyberdream.conf      "$HOME/.config/ghostty/themes/cyberdream.conf"
+link ghostty/themes/everblush.conf       "$HOME/.config/ghostty/themes/everblush.conf"
 
 # Zellij
 link zellij/config.kdl                 "$HOME/.config/zellij/config.kdl"
@@ -57,6 +64,9 @@ link nvim/lua                          "$HOME/.config/nvim/lua"
 # updates the tracked file directly — without this, lazy creates its own real
 # file there and each machine silently drifts to different plugin commits.
 link nvim/lazy-lock.json               "$HOME/.config/nvim/lazy-lock.json"
+
+# Install DMS before switching the live compositor config to its startup command.
+bash "$DOTFILES/dms/install.sh"
 
 # niri (Wayland compositor) and its shell components.
 link niri/config.kdl                   "$HOME/.config/niri/config.kdl"
@@ -94,7 +104,8 @@ if ! command -v niri >/dev/null; then
         || echo "  skipped: run ./niri/install-deps.sh when you want the niri session"
 fi
 
-# Ubuntu ships waybar.service globally enabled and WantedBy=graphical-session
+# DMS installer masks the legacy Waybar and SwayNC user services.
+
 # .target, which niri.service joins — so systemd starts a second bar on top of
 # the one niri/config.kdl spawns. Mask it so the config stays authoritative.
 if systemctl --user list-unit-files waybar.service >/dev/null 2>&1; then

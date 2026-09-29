@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 # lock-session — lock the screen, themed to match the active theme.
 #
-# Prefers hyprlock (nicer, but not always installable on Ubuntu) and falls back
-# to swaylock, which install-deps.sh always installs. Bound to Mod+Escape in
-# niri/config.kdl and used by swayidle for idle/suspend locking.
+# DMS is the primary locker. Keep the legacy locker as an emergency fallback.
+# Bound to Alt+Escape; DMS itself handles idle and suspend locking.
 
 set -euo pipefail
 
-# Never stack two lockers on top of each other (swayidle + manual keypress).
-pgrep -x hyprlock >/dev/null && exit 0
-pgrep -x swaylock >/dev/null && exit 0
+# Never stack a new locker over a legacy locker already holding the session.
+pgrep -u "$(id -u)" -x hyprlock >/dev/null && exit 0
+pgrep -u "$(id -u)" -x swaylock >/dev/null && exit 0
+if [[ -x "$HOME/.local/bin/dms" ]]; then
+    if timeout 5 "$HOME/.local/bin/dms" ipc call lock lock; then
+        exit 0
+    fi
+    echo 'DMS lock unavailable; falling back to the standalone locker.' >&2
+fi
 
 THEME="$(cat "$HOME/.config/current-theme" 2>/dev/null || echo everblush)"
 

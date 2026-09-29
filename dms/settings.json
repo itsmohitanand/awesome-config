@@ -1,0 +1,66 @@
+{
+  "configVersion": 18,
+  "fontFamily": "Inter",
+  "monoFontFamily": "Iosevka Nerd Font Mono",
+  "soundsEnabled": false,
+  "runUserMatugenTemplates": false,
+  "runDmsMatugenTemplates": false,
+  "lockPamExternallyManaged": true,
+  "lockPamPath": "/etc/pam.d/login",
+  "acLockTimeout": 600,
+  "acMonitorTimeout": 720,
+  "batteryLockTimeout": 600,
+  "batteryMonitorTimeout": 720,
+  "lockBeforeSuspend": true,
+  "lockAtStartup": false,
+  "barConfigs": [
+    {
+      "id": "default",
+      "name": "Main Bar",
+      "enabled": true,
+      "position": 0,
+      "screenPreferences": [
+        "all"
+      ],
+      "showOnLastDisplay": true,
+      "leftWidgets": [
+        "launcherButton",
+        "workspaceSwitcher",
+        "focusedWindow"
+      ],
+      "centerWidgets": [
+        "clock"
+      ],
+      "rightWidgets": [
+        "systemTray",
+        "clipboard",
+        "cpuUsage",
+        "memUsage",
+        "notificationButton",
+        "controlCenterButton"
+      ],
+      "spacing": 6,
+      "innerPadding": 4,
+      "bottomGap": 8,
+      "transparency": 1,
+      "widgetTransparency": 1,
+      "squareCorners": false,
+      "noBackground": false,
+      "gothCornersEnabled": false,
+      "gothCornerRadiusOverride": false,
+      "gothCornerRadiusValue": 12,
+      "borderEnabled": false,
+      "borderColor": "surfaceText",
+      "borderOpacity": 1,
+      "borderThickness": 1,
+      "fontScale": 1,
+      "autoHide": false,
+      "autoHideDelay": 250,
+      "openOnOverview": false,
+      "visible": true,
+      "popupGapsAuto": true,
+      "popupGapsManual": 4,
+      "barLengthPadding": 8
+    }
+  ]
+}

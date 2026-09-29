@@ -28,6 +28,10 @@ if [[ -z "$WALL" ]]; then
     exit 0
 fi
 
+# DMS owns the wallpaper when running. Preserve legacy standalone support.
+if [[ -x "$HOME/.local/bin/dms" ]] && timeout 5 "$HOME/.local/bin/dms" ipc call wallpaper set "$WALL" >/dev/null 2>&1; then
+    exit 0
+fi
 if command -v swww >/dev/null; then
     swww query >/dev/null 2>&1 || swww-daemon &
     sleep 0.2

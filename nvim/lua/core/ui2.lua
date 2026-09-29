@@ -1,10 +1,9 @@
+vim.opt.messagesopt:append('timeout:3000')
+
 require('vim._core.ui2').enable({
   enable = true,
   msg = {
     targets = 'msg',
-    msg = {
-      timeout = 3000,
-    },
   },
 })
 

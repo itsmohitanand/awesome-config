@@ -1,0 +1,12 @@
+/* Everblush — shared GTK palette for waybar and swaync.
+ * switch-theme symlinks this to ~/.config/{waybar,swaync}/theme.css */
+@define-color bg      #141b1e;
+@define-color bg_alt  #232a2d;
+@define-color surface #2d3437;
+@define-color fg      #dadada;
+@define-color fg_dim  #8a9291;
+@define-color accent  #6cbfbf;
+@define-color accent2 #67b0e8;
+@define-color good    #8ccf7e;
+@define-color warn    #e5c76b;
+@define-color crit    #e57474;

@@ -1,0 +1,12 @@
+/* Poimandres — shared GTK palette for waybar and swaync.
+ * switch-theme symlinks this to ~/.config/{waybar,swaync}/theme.css */
+@define-color bg      #1B1E28;
+@define-color bg_alt  #171922;
+@define-color surface #303340;
+@define-color fg      #A6ACCD;
+@define-color fg_dim  #767C9D;
+@define-color accent  #5DE4C7;
+@define-color accent2 #ADD7FF;
+@define-color good    #5DE4C7;
+@define-color warn    #FFFAC2;
+@define-color crit    #D0679D;

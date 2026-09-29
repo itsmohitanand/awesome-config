@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# niri-keys — show EVERY niri keybind in a searchable menu (noctalia dmenu).
+# niri-keys — show EVERY niri keybind in a searchable fuzzel menu.
 #
 # niri's built-in overlay (show-hotkey-overlay) deliberately shows only a
 # curated subset: a hardcoded list of ~17 "important" actions, plus binds
@@ -120,11 +120,9 @@ for key, label in out:
 PY
 )"
 
-# `noctalia dmenu` reads stdin, shows it in the launcher and prints the pick —
-# same contract fuzzel --dmenu had. It talks to the running shell, so outside a
-# niri session (or with noctalia down) it fails and the list goes to stdout.
-if [[ -x "$HOME/.local/bin/noctalia" && -n "${WAYLAND_DISPLAY:-}" ]] \
-    && choice="$(printf '%s\n' "$LIST" | "$HOME/.local/bin/noctalia" dmenu --prompt "keys  ")"; then
+if command -v fuzzel >/dev/null && [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
+    choice="$(printf '%s\n' "$LIST" \
+        | fuzzel --dmenu --prompt "keys  " --lines 24 --width 72 || true)"
     [[ -n "$choice" ]] && printf '%s' "${choice%% *}" | wl-copy || true
 else
     printf '%s\n' "$LIST"

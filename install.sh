@@ -30,17 +30,18 @@ link() {
     fi
 
     mkdir -p "$(dirname "$dest")"
+    # Preserve existing files/directories before replacing them with links.
+    if [[ -e "$dest" || -L "$dest" ]]; then
+        local backup
+        backup="${dest}.backup.$(date +%Y%m%d-%H%M%S).$$"
+        mv "$dest" "$backup"
+        printf '  backup: %s\n' "$backup"
+    fi
     ln -sfn "$src" "$dest"
     printf '  link: %s -> %s\n' "$dest" "$src"
 }
 
 echo "Symlinking awesome-config from $DOTFILES"
-
-# Kitty
-link kitty/kitty.conf                  "$HOME/.config/kitty/kitty.conf"
-link kitty/themes/poimandres.conf      "$HOME/.config/kitty/themes/poimandres.conf"
-link kitty/themes/cyberdream.conf      "$HOME/.config/kitty/themes/cyberdream.conf"
-link kitty/themes/everblush.conf       "$HOME/.config/kitty/themes/everblush.conf"
 
 # Ghostty
 link ghostty/config                  "$HOME/.config/ghostty/config.ghostty"
@@ -50,7 +51,6 @@ link ghostty/themes/everblush.conf       "$HOME/.config/ghostty/themes/everblush
 
 # Zellij
 link zellij/config.kdl                 "$HOME/.config/zellij/config.kdl"
-link zellij/layouts/python-dev.kdl     "$HOME/.config/zellij/layouts/python-dev.kdl"
 link zellij/layouts/phd.kdl            "$HOME/.config/zellij/layouts/phd.kdl"
 link zellij/layouts/latex-thesis.kdl   "$HOME/.config/zellij/layouts/latex-thesis.kdl"
 
@@ -65,59 +65,32 @@ link nvim/lua                          "$HOME/.config/nvim/lua"
 # file there and each machine silently drifts to different plugin commits.
 link nvim/lazy-lock.json               "$HOME/.config/nvim/lazy-lock.json"
 
+# Install DMS before switching the live compositor config to its startup command.
+bash "$DOTFILES/dms/install.sh"
+
 # niri (Wayland compositor) and its shell components.
 link niri/config.kdl                   "$HOME/.config/niri/config.kdl"
+link waybar/config.jsonc               "$HOME/.config/waybar/config.jsonc"
+link waybar/style.css                  "$HOME/.config/waybar/style.css"
+link fuzzel/fuzzel.ini                 "$HOME/.config/fuzzel/fuzzel.ini"
+link swaync/config.json                "$HOME/.config/swaync/config.json"
+link swaync/style.css                  "$HOME/.config/swaync/style.css"
 
-# noctalia — bar, launcher, notifications, clipboard, lock, idle and wallpaper.
-# config.toml is safe to symlink because noctalia writes runtime changes (the
-# settings GUI, `noctalia msg ...`) to ~/.local/state/noctalia/settings.toml
-# instead, so the repo copy stays clean. palettes/ is read-only to noctalia.
-link noctalia/config.toml              "$HOME/.config/noctalia/config.toml"
-link noctalia/palettes                 "$HOME/.config/noctalia/palettes"
-
+link niri/set-wallpaper.sh             "$HOME/.local/bin/set-wallpaper"
+link niri/lock.sh                      "$HOME/.local/bin/lock-session"
 link niri/keys.sh                      "$HOME/.local/bin/niri-keys"
+link niri/screenshot-region.sh         "$HOME/.local/bin/screenshot-region"
 link niri/solo-monitor.sh              "$HOME/.local/bin/niri-solo-monitor"
-chmod +x "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/solo-monitor.sh" "$DOTFILES/niri/install-deps.sh" \
-         "$DOTFILES/noctalia/make-palette.py"
+link swappy/config                     "$HOME/.config/swappy/config"
+chmod +x "$DOTFILES/niri/set-wallpaper.sh" "$DOTFILES/niri/lock.sh" \
+         "$DOTFILES/niri/keys.sh" "$DOTFILES/niri/screenshot-region.sh" "$DOTFILES/niri/solo-monitor.sh" \
+         "$DOTFILES/niri/install-deps.sh"
 mkdir -p "$HOME/.config/wallpapers" "$HOME/Pictures/Screenshots"
-
-# niri treats a missing `include` as a FATAL config error, not a skipped file —
-# so ~/.config/niri/noctalia.kdl has to exist before the first login or the
-# session won't start. noctalia regenerates it on every theme change; this is
-# only the seed. Not symlinked and not tracked: it's generated output, and niri
-# resolves the include against the symlink's directory (~/.config/niri), not the
-# repo, so noctalia's writes never land here.
-if [[ ! -f "$HOME/.config/niri/noctalia.kdl" ]]; then
-    mkdir -p "$HOME/.config/niri"
-    cat > "$HOME/.config/niri/noctalia.kdl" <<'SEED'
-// Seeded by install.sh; noctalia overwrites this on the next theme change.
-layout {
-    focus-ring {
-        active-color   "#6cbfbf"
-        inactive-color "#2d3437"
-    }
-}
-SEED
-    printf '  seed: %s\n' "$HOME/.config/niri/noctalia.kdl"
-fi
-
-# Same idea for kitty: kitty.conf includes themes/noctalia.conf, which noctalia
-# generates. kitty only warns on a missing include rather than refusing to start,
-# but seeding it means a fresh clone opens themed instead of on kitty's defaults.
-if [[ ! -f "$HOME/.config/kitty/themes/noctalia.conf" ]]; then
-    mkdir -p "$HOME/.config/kitty/themes"
-    seed_theme="$(cat "$HOME/.config/current-theme" 2>/dev/null || echo everblush)"
-    cp "$DOTFILES/kitty/themes/${seed_theme}.conf" \
-       "$HOME/.config/kitty/themes/noctalia.conf" 2>/dev/null \
-        && printf '  seed: %s\n' "$HOME/.config/kitty/themes/noctalia.conf"
-fi
 
 # Pre-rendered wallpapers, one per theme, so a fresh clone has them without
 # waiting on a 400M-point render. Re-roll any of them in place with:
 #   ./niri/make-wallpaper-chaos.py <theme> niri/wallpapers/<theme>.png
 # Symlinks, so a re-render shows up on the next switch-theme with no re-install.
-# ~/.config/wallpapers is what noctalia's [wallpaper] directory points at, so
-# these also populate its wallpaper picker and the /wall launcher provider.
 link niri/wallpapers/everblush.png     "$HOME/.config/wallpapers/everblush.png"
 link niri/wallpapers/poimandres.png    "$HOME/.config/wallpapers/poimandres.png"
 link niri/wallpapers/cyberdream.png    "$HOME/.config/wallpapers/cyberdream.png"
@@ -132,28 +105,19 @@ if ! command -v niri >/dev/null; then
         || echo "  skipped: run ./niri/install-deps.sh when you want the niri session"
 fi
 
-# Ubuntu ships waybar.service AND swaync.service globally enabled and
-# WantedBy=graphical-session.target, which niri.service joins — so systemd starts
-# both even though nothing in this repo spawns them any more. A stray waybar
-# lands on top of noctalia's bar, and a stray swaync grabs
-# org.freedesktop.Notifications first, which leaves noctalia unable to claim it
-# and kills notifications silently. Killing the processes isn't enough: systemd
-# restarts them. Mask both.
-#
-# install-deps.sh no longer installs either package, so this is a no-op on a
-# fresh machine; it matters on boxes that ran the old stack.
-for unit in waybar.service swaync.service; do
-    if systemctl --user list-unit-files "$unit" >/dev/null 2>&1; then
-        if [[ "$(systemctl --user is-enabled "$unit" 2>/dev/null)" != "masked" ]]; then
-            systemctl --user stop "$unit" >/dev/null 2>&1 || true
-            systemctl --user mask "$unit" >/dev/null 2>&1 \
-                && echo "  mask: $unit (would fight noctalia)"
-        fi
+# DMS installer masks the legacy Waybar and SwayNC user services.
+
+# .target, which niri.service joins — so systemd starts a second bar on top of
+# the one niri/config.kdl spawns. Mask it so the config stays authoritative.
+if systemctl --user list-unit-files waybar.service >/dev/null 2>&1; then
+    if [[ "$(systemctl --user is-enabled waybar.service 2>/dev/null)" != "masked" ]]; then
+        systemctl --user mask waybar.service >/dev/null 2>&1 \
+            && echo "  mask: waybar.service (prevents a duplicate top bar)"
     fi
-done
+fi
 
 # Ulauncher — kept so the GNOME session still works as a fallback while you
-# settle into niri. Under niri the launcher is noctalia's (Alt+Space).
+# settle into niri. Under niri the launcher is fuzzel (Mod+Space).
 # Link the single autostart entry, not all of ~/.config/autostart — other apps
 # drop their own .desktop files in that directory.
 link ulauncher/settings.json           "$HOME/.config/ulauncher/settings.json"
@@ -169,9 +133,8 @@ link .modern_shell_config              "$HOME/.modern_shell_config"
 link switch-theme.sh                   "$HOME/.local/bin/switch-theme"
 chmod +x "$DOTFILES/switch-theme.sh"
 
-# Apply the current theme so every surface starts in sync. Defaults to everblush
-# on a fresh machine. Without a running noctalia this only does nvim/zellij and
-# says so — the rest follows at the next login from noctalia/config.toml.
+# Apply the current theme so waybar/swaync get their theme.css symlink and
+# every surface starts in sync. Defaults to everblush on a fresh machine.
 CURRENT_THEME="$(cat "$HOME/.config/current-theme" 2>/dev/null || echo everblush)"
 echo
 echo "Applying theme: $CURRENT_THEME"

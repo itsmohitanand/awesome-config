@@ -32,6 +32,9 @@ input {
 
     mouse {
         accel-profile "flat"
+        // -1.0 slowest .. 0.0 default .. 1.0 fastest. Flat profile, so this is
+        // a straight sensitivity multiplier. Tune to taste; niri hot-reloads.
+        accel-speed 0.0
     }
 
     // Keyboard focus only — the whole point is not touching the mouse.
@@ -113,15 +116,11 @@ layout {
     // Half-width default: nvim on the left, browser on the right, both readable.
     default-column-width { proportion 0.5; }
 
-    // Colours come from noctalia.kdl (see the include at the bottom of this
-    // file), which noctalia regenerates from the active palette. Only the
-    // geometry lives here — setting active-color/inactive-color in this block
-    // would just be overridden by the include.
-    //
-    // The old two-tone gradient is gone with it: noctalia's niri template emits
-    // a flat active-color, and there's no gradient token to feed it.
     focus-ring {
         width 2
+        // switch-theme rewrites these two lines — keep them on one line each.
+        active-gradient from="#6cbfbf" to="#67b0e8" angle=45 relative-to="workspace-view"
+        inactive-color "#2d3437"
     }
 
     border {
@@ -145,29 +144,9 @@ layout {
 }
 
 // ─── Startup ────────────────────────────────────────────────────────────────
-// Order matters a little: portals and the polkit agent should be up before apps.
-
-spawn-at-startup "/usr/libexec/xdg-desktop-portal-gnome"
-
-// noctalia — bar, launcher, notifications, clipboard, lock, idle and wallpaper
-// in one process. It replaced waybar + swaync + fuzzel + swayidle + swww, so
-// there is exactly one thing to start here and one config to theme.
-//
-// Ubuntu's waybar package still ships a globally-enabled waybar.service that is
-// WantedBy=graphical-session.target, which niri.service joins. waybar isn't
-// spawned here any more, but systemd would still start it on top of noctalia's
-// bar — so install.sh keeps it masked. Undo with
-//     systemctl --user unmask waybar.service
-// only if you go back to waybar.
-//
-// --daemon is the documented startup mode; noctalia ships no systemd unit.
-// Idle timeouts, lock and wallpaper all live in noctalia/config.toml now, which
-// is why the swayidle and set-wallpaper lines are gone.
-spawn-at-startup "sh" "-c" "$HOME/.local/bin/noctalia --daemon"
-
-// No wlsunset: noctalia's [nightlight] does the same job from the same
-// coordinates ([location] in noctalia/config.toml, Copenhagen 55.68/12.57).
-// Running both means two clients writing gamma at once.
+// DMS owns the panel, launcher, notifications, clipboard, wallpaper and idle lock.
+// User-local wrapper supplies its private Quickshell runtime on Ubuntu 24.04.
+spawn-at-startup "sh" "-c" "$HOME/.local/bin/dms run"
 
 // XWayland for X11 apps (Slack, Discord, older GTK). niri 26.04 manages the
 // satellite process itself — don't spawn it manually and don't set DISPLAY,
@@ -309,11 +288,9 @@ window-rule {
 }
 
 layer-rule {
-    // Prefix match, not ^noctalia$: the surfaces are named per role —
-    // noctalia-bar-main, noctalia-wallpaper, and so on (check with
-    // `niri msg layers`). An anchored exact match silently matches nothing.
-    // noctalia draws its own shadow from [shell.shadow], so no compositor one.
-    match namespace="^noctalia-"
+    match namespace="^quickshell$"
+    // Place DMS wallpaper in the overview backdrop.
+    place-within-backdrop true
     shadow { off; }
 }
 
@@ -332,9 +309,7 @@ binds {
     // ghostty is a snap; /snap/bin isn't guaranteed on niri's PATH, so spawn it
     // by absolute path rather than a bare `spawn "ghostty"`.
     Alt+Return hotkey-overlay-title="Terminal" { spawn "/snap/bin/ghostty"; }
-    // noctalia panels are driven over its IPC socket. `sh -c` because these go
-    // through $HOME — see the environment block above for why there's no PATH.
-    Alt+Space  hotkey-overlay-title="Launcher" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle launcher"; }
+    Alt+Space  hotkey-overlay-title="Launcher" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call spotlight toggle"; }
     // Not Alt+B — that's readline backward-word, which is worth keeping.
     Alt+Shift+B hotkey-overlay-title="Browser" { spawn "firefox"; }
     Alt+E      hotkey-overlay-title="Files"    { spawn "/snap/bin/ghostty" "-e" "yazi"; }
@@ -344,35 +319,14 @@ binds {
     Alt+Shift+C hotkey-overlay-title="Calculator" {
         spawn "sh" "-c" "command -v qalculate-gtk >/dev/null && exec qalculate-gtk || exec gnome-calculator";
     }
-    // noctalia keeps its own clipboard history, so no wl-paste/cliphist pipeline
-    // to spawn at startup and no dmenu round-trip here.
     Alt+V      hotkey-overlay-title="Clipboard history" {
-        spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle clipboard";
+        spawn "sh" "-c" "$HOME/.local/bin/dms ipc call clipboard toggle";
     }
-    // Notifications live in the control centre panel rather than a panel of
-    // their own; the second word is the tab to open it on.
-    Alt+N      hotkey-overlay-title="Notifications" {
-        spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle control-center notifications";
-    }
+    Alt+N      hotkey-overlay-title="Notifications" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call notifications toggle"; }
     // Not Alt+L — that's focus-column-right. Lock is Alt+Escape.
-    // noctalia's lock screen authenticates through PAM; lock.sh and
-    // hyprlock/swaylock are gone.
-    Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg session lock"; }
+    Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/lock-session"; }
 
-    // ─── noctalia panels ────────────────────────────────────────────────
-    // Alt+Tab has no niri equivalent — the compositor has no window switcher, so
-    // this overlay is noctalia's. It's a toggle, not a hold-to-cycle: a layer
-    // client can't see Alt being held, only the keypress niri forwards.
-    Alt+Tab      hotkey-overlay-title="Window switcher" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg window-switcher toggle"; }
-    // Softer than Alt+Shift+E, which quits niri outright with no confirmation.
-    Alt+Shift+Q  hotkey-overlay-title="Session menu" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle session"; }
-    Alt+Comma    hotkey-overlay-title="noctalia settings" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg settings-toggle"; }
-    Alt+Shift+N  hotkey-overlay-title="Do not disturb" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg notification-dnd-toggle"; }
-    // Idle inhibitor. noctalia owns the 10-minute lock now, so this is the way to
-    // hold it off during a presentation or a long build.
-    Alt+A        hotkey-overlay-title="Caffeine (inhibit idle)" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg caffeine-toggle"; }
-    // Picks from ~/.config/wallpapers, where install.sh links the renders.
-    Alt+Shift+W  hotkey-overlay-title="Random wallpaper" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg wallpaper-random"; }
+    Alt+Comma hotkey-overlay-title="Desktop settings" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call settings toggle"; }
 
     Alt+Q { close-window; }
 
@@ -463,28 +417,29 @@ binds {
 
     Alt+W { toggle-window-floating; }
 
-    // Screenshots (built in — no flameshot needed).
-    Print            { screenshot; }
+    // Print opens a lightweight region snip with annotation and save/copy.
+    // Alt+S mirrors it for keyboards without a Print key (Voyager, 60% boards).
+    Print            { spawn "screenshot-region"; }
     Ctrl+Print       { screenshot-screen; }
     Alt+Print        { screenshot-window; }
+    Alt+S            { spawn "screenshot-region"; }
+    Alt+Ctrl+S       { screenshot-screen; }
+    Alt+Shift+S      { screenshot-window; }
 
     // Media and hardware keys.
-    // Through noctalia rather than wpctl/playerctl directly: same hardware, but
-    // it draws the OSD and keeps the bar's volume and media widgets in step.
-    // wpctl and playerctl are still installed if you need to script them.
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg volume-up"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg volume-down"; }
-    XF86AudioMute        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg volume-mute"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg mic-mute"; }
-    XF86AudioPlay        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg media toggle"; }
-    XF86AudioNext        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg media next"; }
-    XF86AudioPrev        allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg media previous"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+" "--limit" "1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86AudioPlay        allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioNext        allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPrev        allow-when-locked=true { spawn "playerctl" "previous"; }
     // Keyboards with a dedicated calculator key. Harmless if yours has none.
     XF86Calculator hotkey-overlay-title="Calculator" {
         spawn "sh" "-c" "command -v qalculate-gtk >/dev/null && exec qalculate-gtk || exec gnome-calculator";
     }
-    XF86MonBrightnessUp   allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg brightness-up"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg brightness-down"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
 
     // Session
     Alt+Shift+E { quit; }
@@ -492,14 +447,3 @@ binds {
     // Games: blank every screen but the focused one so the cursor can't escape.
     Alt+Ctrl+M hotkey-overlay-title="Solo monitor (toggle)" { spawn "sh" "-c" "$HOME/.local/bin/niri-solo-monitor"; }
 }
-
-// ─── Theme ──────────────────────────────────────────────────────────────────
-// noctalia regenerates ~/.config/niri/noctalia.kdl from the active palette
-// whenever the theme changes, and niri hot-reloads on the write. It holds the
-// focus-ring, border, shadow, tab-indicator and insert-hint colours.
-//
-// The file is NOT tracked in this repo — it's generated output, and niri treats
-// a missing include as a fatal config error rather than skipping it, so
-// install.sh seeds one before you ever log in. Don't edit it; edits are lost on
-// the next theme switch.
-include "noctalia.kdl"

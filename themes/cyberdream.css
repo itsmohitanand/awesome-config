@@ -1,0 +1,12 @@
+/* Cyberdream — shared GTK palette for waybar and swaync.
+ * switch-theme symlinks this to ~/.config/{waybar,swaync}/theme.css */
+@define-color bg      #16181a;
+@define-color bg_alt  #1e2124;
+@define-color surface #3c4048;
+@define-color fg      #ffffff;
+@define-color fg_dim  #7b8496;
+@define-color accent  #ffbd5e;
+@define-color accent2 #5ea1ff;
+@define-color good    #5eff6c;
+@define-color warn    #f1ff5e;
+@define-color crit    #ff6e5e;

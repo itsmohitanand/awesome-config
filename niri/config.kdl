@@ -262,7 +262,7 @@ window-rule {
 
 // Terminals and the editor get a bit more room by default.
 window-rule {
-    match app-id="^kitty$"
+    match app-id="^com[.]mitchellh[.]ghostty$"
     default-column-width { proportion 0.5; }
 }
 
@@ -290,6 +290,15 @@ window-rule {
     open-floating true
     default-column-width { fixed 460; }
     default-window-height { fixed 620; }
+}
+
+// The PDF preview sits beside the editor, not on top of it. vimtex spawns
+// zathura on the first compile, so open-focused false keeps the cursor in the
+// draft instead of handing the next keystrokes to the viewer.
+window-rule {
+    match app-id="^org.pwmt.zathura$"
+    default-column-width { proportion 0.5; }
+    open-focused false
 }
 
 // Picture-in-picture stays on top, floating, out of the way.
@@ -320,16 +329,15 @@ binds {
     Alt+Slash       hotkey-overlay-title="Built-in overlay" { show-hotkey-overlay; }
 
     // Launching
-    // kitty is a ~/.local/bin install, which is not on niri's PATH, so a bare
-    // `spawn "kitty"` fails to exec with nothing to show for it. Same $HOME
-    // detour as the noctalia binds below.
-    Alt+Return hotkey-overlay-title="Terminal" { spawn "sh" "-c" "$HOME/.local/bin/kitty"; }
+    // ghostty is a snap; /snap/bin isn't guaranteed on niri's PATH, so spawn it
+    // by absolute path rather than a bare `spawn "ghostty"`.
+    Alt+Return hotkey-overlay-title="Terminal" { spawn "/snap/bin/ghostty"; }
     // noctalia panels are driven over its IPC socket. `sh -c` because these go
     // through $HOME — see the environment block above for why there's no PATH.
     Alt+Space  hotkey-overlay-title="Launcher" { spawn "sh" "-c" "$HOME/.local/bin/noctalia msg panel-toggle launcher"; }
     // Not Alt+B — that's readline backward-word, which is worth keeping.
     Alt+Shift+B hotkey-overlay-title="Browser" { spawn "firefox"; }
-    Alt+E      hotkey-overlay-title="Files"    { spawn "sh" "-c" "$HOME/.local/bin/kitty -e yazi"; }
+    Alt+E      hotkey-overlay-title="Files"    { spawn "/snap/bin/ghostty" "-e" "yazi"; }
     // Not Alt+C — that's center-column. qalculate does units, currency and
     // symbolic algebra, so it's worth a key; gnome-calculator is the fallback
     // if it isn't installed.

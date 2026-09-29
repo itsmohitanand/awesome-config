@@ -42,6 +42,12 @@ link kitty/themes/poimandres.conf      "$HOME/.config/kitty/themes/poimandres.co
 link kitty/themes/cyberdream.conf      "$HOME/.config/kitty/themes/cyberdream.conf"
 link kitty/themes/everblush.conf       "$HOME/.config/kitty/themes/everblush.conf"
 
+# Ghostty
+link ghostty/config                  "$HOME/.config/ghostty/config.ghostty"
+link ghostty/themes/poimandres.conf      "$HOME/.config/ghostty/themes/poimandres.conf"
+link ghostty/themes/cyberdream.conf      "$HOME/.config/ghostty/themes/cyberdream.conf"
+link ghostty/themes/everblush.conf       "$HOME/.config/ghostty/themes/everblush.conf"
+
 # Zellij
 link zellij/config.kdl                 "$HOME/.config/zellij/config.kdl"
 link zellij/layouts/python-dev.kdl     "$HOME/.config/zellij/layouts/python-dev.kdl"

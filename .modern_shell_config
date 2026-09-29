@@ -178,7 +178,7 @@ alias zm='zellij'
 alias tm='tmux'
 
 # ============================================================================
-# ALIASES — Kitty
+# ALIASES — Kitty graphics protocol (ghostty implements it too)
 # ============================================================================
 unalias icat 2>/dev/null; function icat { kitty +kitten icat "$@"; }
 

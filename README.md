@@ -1,7 +1,7 @@
 # awesome-config
 
 Desktop and terminal configuration: a [niri](https://github.com/YaLTeR/niri) Wayland
-session on Ubuntu, with kitty, zellij, starship and neovim inside it.
+session on Ubuntu, with ghostty, zellij, starship and neovim inside it.
 
 ## Tools
 
@@ -9,7 +9,7 @@ session on Ubuntu, with kitty, zellij, starship and neovim inside it.
 |------|---------|
 | [niri](https://github.com/YaLTeR/niri) | Scrollable-tiling Wayland compositor |
 | [noctalia](https://github.com/noctalia-dev/noctalia-shell) | Desktop shell: bar, launcher (`Alt+Space`), notifications, control centre (`Alt+N`), clipboard (`Alt+V`), lock, idle, wallpaper |
-| [kitty](https://sw.kovidgoyal.net/kitty/) | GPU-accelerated terminal emulator |
+| [ghostty](https://ghostty.org/) | GPU-accelerated terminal emulator (snap) |
 | [starship](https://starship.rs/) | Cross-shell prompt |
 | [zellij](https://zellij.dev/) | Terminal multiplexer |
 | [neovim](https://neovim.io/) | Text editor |
@@ -103,7 +103,7 @@ switch-theme cyberdream
 | Surface | How theme is applied |
 |---------|---------------------|
 | noctalia | `noctalia msg color-scheme-set custom <name>` — live |
-| kitty | noctalia template → `themes/noctalia.conf`, running instances signalled — live |
+| ghostty | `config-file = themes/<name>.conf` in `config.ghostty` — new windows, or `ctrl+shift+F5` |
 | niri | noctalia template → `~/.config/niri/noctalia.kdl`, hot-reloaded — live |
 | GTK / Qt | noctalia templates for the palette, `gsettings` for theme/cursor/fonts |
 | wallpaper | `noctalia msg wallpaper-set` — live, with a crossfade |
@@ -161,7 +161,8 @@ in its wallpaper picker and the launcher's wallpaper provider.
 
 ### Adding a new theme
 
-1. Add `kitty/themes/<name>.conf` with the full ANSI 16 plus fg/bg/cursor/selection
+1. Add `kitty/themes/<name>.conf` with the full ANSI 16 plus fg/bg/cursor/selection,
+   and the same colours as `ghostty/themes/<name>.conf`
 2. Add a `<name>` entry to `ACCENTS` in `noctalia/make-palette.py` — four values
    kitty has no slot for (accent, accent2, dim, bg_alt)
 3. Run `./noctalia/make-palette.py <name>` to generate the palette JSON
@@ -191,7 +192,11 @@ awesome-config/
 │   ├── make-wallpaper-chaos.py  # strange-attractor renderer (numpy + pillow)
 │   └── wallpapers/         # pre-rendered 4K, one per theme
 │       └── <theme>.png     # → ~/.config/wallpapers/<theme>.png
-├── kitty/
+├── ghostty/
+│   ├── config              # → ~/.config/ghostty/config.ghostty
+│   └── themes/             # → ~/.config/ghostty/themes/
+│       └── <theme>.conf
+├── kitty/              # kept as the noctalia palette source
 │   ├── kitty.conf
 │   └── themes/
 │       ├── poimandres.conf

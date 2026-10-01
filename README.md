@@ -43,7 +43,7 @@ bash install.sh             # symlink configs, apply current theme
 On a fresh Ubuntu machine with Ghostty already installed, run
 `bash setup-machine.sh` as your normal user. It asks for sudo, installs the
 build prerequisites and desktop stack, builds Starship/Zellij and nightly
-Neovim when missing, installs Iosevka Nerd Font, and enables the Bash config.
+Neovim when missing, installs JetBrainsMono Nerd Font, and enables the Bash config.
 Source builds can take a while. Existing config files are backed up by the
 installer before they are replaced with symlinks.
 

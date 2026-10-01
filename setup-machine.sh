@@ -8,6 +8,8 @@ export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 trap 'echo "Setup stopped at line $LINENO. Fix the reported error and rerun bash setup-machine.sh." >&2' ERR
 
 sudo -v
+# DMS lock screen PAM service (quickshell can't use /etc/pam.d/login on Ubuntu).
+sudo install -m 644 "$(dirname "$(readlink -f "$0")")/niri/pam-dms-lock" /etc/pam.d/dms-lock
 sudo apt update
 # Install build dependencies before install-deps.sh builds its Cargo extras.
 sudo apt install -y rustup build-essential pkg-config clang cmake ninja-build \
@@ -42,12 +44,12 @@ if ! command -v nvim >/dev/null; then
     make -C "$NVIM_SRC" CMAKE_INSTALL_PREFIX="$HOME/.local" install
 fi
 
-# Install the font named by both the terminal and desktop configs.
-FONT_DIR="$HOME/.local/share/fonts/IosevkaNerdFont"
-if ! fc-list : family | grep -Fq 'Iosevka Nerd Font Mono'; then
+# Install the Nerd Font the desktop configs name (ghostty ships its own default).
+FONT_DIR="$HOME/.local/share/fonts/JetBrainsMonoNerdFont"
+if ! fc-list : family | grep -Fq 'JetBrainsMono Nerd Font Mono'; then
     FONT_ARCHIVE="$(mktemp --suffix=.zip)"
     curl --fail --location --retry 3 \
-        https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Iosevka.zip \
+        https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip \
         -o "$FONT_ARCHIVE"
     mkdir -p "$FONT_DIR"
     unzip -o "$FONT_ARCHIVE" '*.ttf' -d "$FONT_DIR"

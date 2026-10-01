@@ -2,8 +2,9 @@
 font-size = 12
 adjust-cell-height = 1
 
-# Updated by switch-theme.
-config-file = themes/everblush.conf
+# Default ghostty colours. To use a repo theme instead, uncomment the line below
+# (switch-theme rewrites it once it is uncommented).
+# config-file = themes/everblush.conf
 
 cursor-style = block
 cursor-style-blink = true

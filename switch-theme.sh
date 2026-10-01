@@ -138,7 +138,7 @@ if command -v gsettings >/dev/null; then
     gsettings set org.gnome.desktop.interface cursor-size 24
     gsettings set org.gnome.desktop.interface font-name 'Inter 11'
     gsettings set org.gnome.desktop.interface document-font-name 'Inter 11'
-    gsettings set org.gnome.desktop.interface monospace-font-name 'Iosevka Nerd Font Mono 11'
+    gsettings set org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font Mono 11'
 fi
 
 # ── Persist + wallpaper ─────────────────────────────────────────────────────

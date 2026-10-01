@@ -1,0 +1,9 @@
+# PAM service for the DMS lock screen (installed to /etc/pam.d/dms-lock).
+# Quickshell's bundled libpam can't parse `@include` and looks for modules in
+# /usr/lib/security, so /etc/pam.d/login fails on Ubuntu. This file is flat and
+# uses absolute module paths (mirrors common-auth: pam_unix, then pam_sss).
+auth    [success=2 default=ignore] /usr/lib/x86_64-linux-gnu/security/pam_unix.so nullok
+auth    [success=1 default=ignore] /usr/lib/x86_64-linux-gnu/security/pam_sss.so use_first_pass
+auth    requisite                  /usr/lib/x86_64-linux-gnu/security/pam_deny.so
+auth    required                   /usr/lib/x86_64-linux-gnu/security/pam_permit.so
+account required                   /usr/lib/x86_64-linux-gnu/security/pam_unix.so

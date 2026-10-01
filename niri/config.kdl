@@ -325,6 +325,8 @@ binds {
     Alt+N      hotkey-overlay-title="Notifications" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call notifications toggle"; }
     // Not Alt+L — that's focus-column-right. Lock is Alt+Escape.
     Alt+Escape hotkey-overlay-title="Lock"     { spawn "sh" "-c" "$HOME/.local/bin/lock-session"; }
+    // Standby. DMS locks first (lockBeforeSuspend).
+    Alt+Ctrl+Escape hotkey-overlay-title="Suspend" { spawn "systemctl" "suspend"; }
 
     Alt+Comma hotkey-overlay-title="Desktop settings" { spawn "sh" "-c" "$HOME/.local/bin/dms ipc call settings toggle"; }
 
